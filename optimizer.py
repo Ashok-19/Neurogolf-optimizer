@@ -260,6 +260,7 @@ class NeuroGolfOptimizer:
                 self.cache,
                 incumbent_cost,
                 max_repairs=self.config.max_near_miss_repairs,
+                source_mutations=candidate.mutations,
             )
         except Exception as exc:
             append_jsonl(ctx.run_dir / "errors.jsonl", {"event": "near_miss_repair_error", "model": candidate.model_path, "error": repr(exc)})
@@ -284,6 +285,15 @@ class NeuroGolfOptimizer:
                     "repair": repair.get("repair"),
                     "source_model": candidate.model_path,
                     "source_hash": candidate.model_hash,
+                    "repair_family": repair.get("repair_family"),
+                    "failure_class": repair.get("failure_class"),
+                    "internal_or_dense": repair.get("internal_or_dense"),
+                    "source_mutation_family": repair.get("source_mutation_family"),
+                    "estimated_repair_cost": repair.get("estimated_repair_cost"),
+                    "actual_validation_cost": repair.get("actual_validation_cost"),
+                    "primary_repair": repair.get("primary_repair"),
+                    "cost_gate": repair.get("cost_gate"),
+                    "repair_metadata": repair.get("repair_metadata"),
                 },
             )
             try:

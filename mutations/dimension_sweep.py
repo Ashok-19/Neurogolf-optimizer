@@ -32,6 +32,32 @@ def _axis_from_shape(arr: np.ndarray) -> str | None:
     return None
 
 
+def _related_axis_initializers(arrays: dict[str, np.ndarray], axis: str, old_len: int) -> list[dict]:
+    related: list[dict] = []
+    for init_name, arr in arrays.items():
+        init_axis = _axis_from_name(init_name) or _axis_from_shape(arr)
+        if init_axis != axis:
+            continue
+        if not np.issubdtype(arr.dtype, np.integer) or not _is_arange(arr):
+            continue
+        if int(arr.size) != old_len:
+            continue
+        related.append({"name": init_name, "shape": list(arr.shape), "dtype": str(arr.dtype)})
+    return related
+
+
+def _pad_to_30_change(arrays: dict[str, np.ndarray], axis: str, new_len: int) -> dict | None:
+    pads = arrays.get("pad_to_30_i64")
+    if not isinstance(pads, np.ndarray) or pads.shape != (8,):
+        return None
+    new_pads = pads.astype(np.int64).copy()
+    if axis == "row":
+        new_pads[6] = max(0, 30 - new_len)
+    elif axis == "col":
+        new_pads[7] = max(0, 30 - new_len)
+    return {"name": "pad_to_30_i64", "old": pads.astype(np.int64).tolist(), "new": new_pads.tolist()}
+
+
 class DimensionSweep(BaseMutationFamily):
     name = "dimension_sweep"
 
@@ -54,12 +80,17 @@ class DimensionSweep(BaseMutationFamily):
                     for new_len in range(old_len - 1, max(3, old_len - 4), -1):
                         meta = {
                             "source_idx": init_name,
+                            "source_initializer": init_name,
+                            "source_arange_initializer": init_name,
                             "node_name": node.name,
                             "node_output": list(node.output),
                             "input_index": input_index,
                             "axis": axis,
                             "old_len": old_len,
                             "new_len": new_len,
+                            "related_axis_initializers": _related_axis_initializers(arrays, axis, old_len),
+                            "related_row_col_initializers_changed": _related_axis_initializers(arrays, axis, old_len),
+                            "pad_to_30_change": _pad_to_30_change(arrays, axis, new_len),
                         }
                         out.append(
                             Mutation(

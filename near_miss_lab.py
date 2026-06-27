@@ -7,6 +7,7 @@ import shutil
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 from onnx import TensorProto, helper, numpy_helper
@@ -17,14 +18,85 @@ if __package__ in (None, ""):
 
 from .cache import ValidationCache
 from .config import add_common_args, config_from_args
-from .graph_utils import load_model, safe_build, save_model
+from .graph_utils import (
+    get_consumers,
+    get_tensor_elem_type,
+    get_value_info_shapes,
+    initializer_arrays,
+    load_model,
+    safe_build,
+    save_model,
+    set_initializer,
+    tensor_dtype_size,
+)
 from .locking import TaskLock
 from .pair_runner import run_pairs
+from .repair_classification import FailureClass, classify_diagnostics
 from .reporting import write_json
 from .scoring import delta_points, is_accepted, near_miss_category
 from .search.scheduler import read_baseline_cost
 from .synthesis.task_data import load_all_available_pairs
 from .validate import validate_model
+
+
+def _normalize_source_mutations(source_mutations: list[Any] | None = None, source_provenance: list[dict] | None = None) -> list[dict]:
+    raw = source_provenance if source_provenance is not None else source_mutations
+    out: list[dict] = []
+    for item in raw or []:
+        if isinstance(item, dict):
+            data = dict(item)
+        elif hasattr(item, "to_json_dict"):
+            data = dict(item.to_json_dict())
+        else:
+            data = {
+                "id": getattr(item, "id", None),
+                "family": getattr(item, "family", None),
+                "description": getattr(item, "description", None),
+                "metadata": getattr(item, "metadata", None) or {},
+            }
+        data.setdefault("metadata", {})
+        out.append(
+            {
+                "id": data.get("id"),
+                "family": data.get("family"),
+                "description": data.get("description"),
+                "metadata": data.get("metadata") or {},
+            }
+        )
+    return out
+
+
+def _source_provenance_summary(source_provenance: list[dict]) -> dict:
+    families = [str(item.get("family")) for item in source_provenance if item.get("family")]
+    ids = [str(item.get("id")) for item in source_provenance if item.get("id")]
+    return {
+        "source_mutations": source_provenance,
+        "source_mutation_families": list(dict.fromkeys(families)),
+        "source_mutation_ids": list(dict.fromkeys(ids)),
+    }
+
+
+def _matching_source_mutation(failure: FailureClass, source_provenance: list[dict], family: str | None = None) -> dict | None:
+    axis_target = _failure_axis_and_target(failure)
+    if axis_target is None:
+        return None
+    axis, target_len = axis_target
+    reduced_len = target_len - 1
+    for item in source_provenance:
+        if family is not None and item.get("family") != family:
+            continue
+        meta = item.get("metadata") or {}
+        if item.get("family") == "dimension_sweep":
+            try:
+                old_len = int(meta.get("old_len", -1))
+                new_len = int(meta.get("new_len", -1))
+            except (TypeError, ValueError):
+                continue
+            if meta.get("axis") == axis and old_len == target_len and new_len == reduced_len:
+                return item
+        elif item.get("family") in {"where_ablation", "where_combo"} and failure.kind in {"missing_bottom_row", "missing_row", "missing_border"}:
+            return item
+    return None
 
 
 def _resolve_model(root: Path, model_arg: str) -> Path:
@@ -286,6 +358,318 @@ def _default_opset(model) -> int:
     return 12
 
 
+def _array_is_arange(arr: np.ndarray) -> bool:
+    flat = np.asarray(arr).reshape(-1)
+    return flat.size >= 2 and flat.size <= 30 and np.array_equal(flat, np.arange(flat.size, dtype=flat.dtype))
+
+
+def _axis_from_name(name: str | None) -> str | None:
+    if not name:
+        return None
+    low = name.lower()
+    if "row" in low or "height" in low or low in {"r", "rr"}:
+        return "row"
+    if "col" in low or "width" in low or low in {"c", "cc"}:
+        return "col"
+    return None
+
+
+def _axis_from_arange_shape(arr: np.ndarray) -> str | None:
+    if arr.ndim == 4:
+        if arr.shape[2] > 1 and arr.shape[3] == 1:
+            return "row"
+        if arr.shape[2] == 1 and arr.shape[3] > 1:
+            return "col"
+    if arr.ndim == 2:
+        if arr.shape[0] > 1 and arr.shape[1] == 1:
+            return "row"
+        if arr.shape[0] == 1 and arr.shape[1] > 1:
+            return "col"
+    return None
+
+
+def _node_axis_hint(node) -> str | None:
+    axis = _axis_from_name(getattr(node, "name", ""))
+    if axis:
+        return axis
+    for out in getattr(node, "output", []) or []:
+        axis = _axis_from_name(out)
+        if axis:
+            return axis
+    return None
+
+
+def _failure_axis_and_target(failure: FailureClass) -> tuple[str, int] | None:
+    if not failure.expected_shape:
+        return None
+    if failure.kind in {"missing_last_column", "missing_column", "wrong_output_width"}:
+        return "col", int(failure.expected_shape[1])
+    if failure.kind in {"missing_bottom_row", "missing_row", "wrong_output_height"}:
+        return "row", int(failure.expected_shape[0])
+    return None
+
+
+def _unique_initializer_name(model, base: str) -> str:
+    names = {init.name for init in model.graph.initializer}
+    if base not in names:
+        return base
+    idx = 1
+    while f"{base}_{idx}" in names:
+        idx += 1
+    return f"{base}_{idx}"
+
+
+def _internal_dimension_restore_model(model, failure: FailureClass, _name: str, source_provenance: list[dict] | None = None) -> tuple[object | None, dict]:
+    axis_target = _failure_axis_and_target(failure)
+    if axis_target is None:
+        return None, {"reason": "unsupported_failure_class"}
+    axis, target_len = axis_target
+    old_len = target_len - 1
+    if old_len < 2 or target_len > 30:
+        return None, {"reason": "invalid_extent", "axis": axis, "target_len": target_len}
+    repaired = copy.deepcopy(model)
+    arrays = initializer_arrays(repaired)
+    consumers = get_consumers(repaired)
+    changed_initializers: list[dict] = []
+    cloned_initializers: list[dict] = []
+    reused_initializers: list[dict] = []
+    source_match = _matching_source_mutation(failure, source_provenance or [], "dimension_sweep")
+    provenance_family = source_match.get("family") if source_match else "dimension_sweep_inferred"
+    changed = False
+    for init_name, arr in list(arrays.items()):
+        if not np.issubdtype(arr.dtype, np.integer) or not _array_is_arange(arr):
+            continue
+        init_axis = _axis_from_name(init_name) or _axis_from_arange_shape(arr)
+        if init_axis == axis and arr.size == old_len and arr.ndim == 4:
+            if axis == "row":
+                new_arr = np.arange(target_len, dtype=arr.dtype).reshape(1, 1, target_len, 1)
+            else:
+                new_arr = np.arange(target_len, dtype=arr.dtype).reshape(1, 1, 1, target_len)
+            set_initializer(repaired, init_name, new_arr)
+            changed_initializers.append({"name": init_name, "old_shape": list(arr.shape), "new_shape": list(new_arr.shape)})
+            changed = True
+        elif arr.ndim == 1 and arr.size == old_len:
+            matching_consumers = [node for node in consumers.get(init_name, []) if _node_axis_hint(node) == axis]
+            if not matching_consumers:
+                continue
+            reusable_name = None
+            for candidate_name, candidate_arr in arrays.items():
+                if (
+                    candidate_arr.ndim == 1
+                    and candidate_arr.size == target_len
+                    and candidate_arr.dtype == arr.dtype
+                    and _array_is_arange(candidate_arr)
+                ):
+                    reusable_name = candidate_name
+                    break
+            if reusable_name is None:
+                new_name = _unique_initializer_name(repaired, f"{init_name}_{axis}_{target_len}")
+                new_arr = np.arange(target_len, dtype=arr.dtype)
+                repaired.graph.initializer.append(numpy_helper.from_array(new_arr, name=new_name))
+                cloned_initializers.append(
+                    {
+                        "source": init_name,
+                        "new_name": new_name,
+                        "old_shape": list(arr.shape),
+                        "new_shape": list(new_arr.shape),
+                        "consumer_nodes": [node.name for node in matching_consumers],
+                    }
+                )
+            else:
+                new_name = reusable_name
+                reused_initializers.append(
+                    {
+                        "source": init_name,
+                        "reused_name": reusable_name,
+                        "old_shape": list(arr.shape),
+                        "consumer_nodes": [node.name for node in matching_consumers],
+                    }
+                )
+            for node in matching_consumers:
+                for i, inp in enumerate(node.input):
+                    if inp == init_name:
+                        node.input[i] = new_name
+                        changed = True
+    pad_change = None
+    pad = initializer_arrays(repaired).get("pad_to_30_i64")
+    if isinstance(pad, np.ndarray) and pad.shape == (8,):
+        new_pad = pad.astype(np.int64).copy()
+        pad_index = 6 if axis == "row" else 7
+        new_pad[pad_index] = max(0, 30 - target_len)
+        if not np.array_equal(pad, new_pad):
+            set_initializer(repaired, "pad_to_30_i64", new_pad)
+            pad_change = {"name": "pad_to_30_i64", "old": pad.astype(np.int64).tolist(), "new": new_pad.tolist()}
+            changed = True
+    if not changed or (not changed_initializers and not cloned_initializers and not reused_initializers):
+        return None, {"reason": "no_axis_extent_to_restore", "axis": axis, "target_len": target_len}
+    del repaired.graph.value_info[:]
+    return repaired, {
+        "strategy": "restore_axis_dimension",
+        "axis": axis,
+        "old_len": old_len,
+        "new_len": target_len,
+        "changed_initializers": changed_initializers,
+        "cloned_initializers": cloned_initializers,
+        "reused_initializers": reused_initializers,
+        "pad_to_30_change": pad_change,
+        "source_mutation_family": provenance_family,
+        "source_mutation": source_match,
+    }
+
+
+def _scalar_one_for_dtype(dtype: np.dtype) -> np.ndarray:
+    if np.issubdtype(dtype, np.floating) or np.issubdtype(dtype, np.integer):
+        return np.array(1, dtype=dtype)
+    return np.array(1, dtype=np.float32)
+
+
+def _internal_scalar_extent_plus_one_models(
+    model,
+    failure: FailureClass,
+    name_prefix: str,
+    limit: int = 2,
+    source_provenance: list[dict] | None = None,
+) -> list[tuple[str, object, dict]]:
+    axis_target = _failure_axis_and_target(failure)
+    if axis_target is None:
+        return []
+    axis, _target_len = axis_target
+    source_match = _matching_source_mutation(failure, source_provenance or [], "where_ablation")
+    if source_match is None:
+        source_match = _matching_source_mutation(failure, source_provenance or [], "where_combo")
+    provenance_family = source_match.get("family") if source_match else "where_ablation_inferred"
+    arrays = initializer_arrays(model)
+    matches: list[tuple[int, object, np.ndarray]] = []
+    for idx, node in enumerate(model.graph.node):
+        if node.op_type != "Less" or len(node.input) < 2:
+            continue
+        coord = arrays.get(node.input[0])
+        if coord is None or _axis_from_arange_shape(coord) != axis:
+            continue
+        matches.append((idx, node, coord))
+    out: list[tuple[str, object, dict]] = []
+    for variant_idx, (node_idx, node, coord) in enumerate(reversed(matches[-limit:])):
+        repaired = copy.deepcopy(model)
+        target_node = list(repaired.graph.node)[node_idx]
+        old_extent = target_node.input[1]
+        one_name = _unique_initializer_name(repaired, f"{name_prefix}_{variant_idx}_one")
+        plus_name = f"{name_prefix}_{variant_idx}_extent_plus_one"
+        repaired.graph.initializer.append(numpy_helper.from_array(_scalar_one_for_dtype(coord.dtype), name=one_name))
+        repaired.graph.node.insert(node_idx, helper.make_node("Add", [old_extent, one_name], [plus_name], name=plus_name))
+        list(repaired.graph.node)[node_idx + 1].input[1] = plus_name
+        del repaired.graph.value_info[:]
+        out.append(
+            (
+                f"{name_prefix}_{variant_idx}",
+                repaired,
+                {
+                    "strategy": "scalar_extent_plus_one",
+                    "axis": axis,
+                    "less_node": node.name,
+                    "less_node_index": node_idx,
+                    "old_extent": old_extent,
+                    "new_extent": plus_name,
+                    "coordinate_initializer": node.input[0],
+                    "source_mutation_family": provenance_family,
+                    "source_mutation": source_match,
+                },
+            )
+        )
+    return out
+
+
+def _internal_selector_extent_candidates(
+    model,
+    failures: list[FailureClass],
+    source_provenance: list[dict] | None = None,
+) -> list[tuple[str, object | None, dict]]:
+    candidates: list[tuple[str, object | None, dict]] = []
+    for idx, failure in enumerate(failures[:6]):
+        if failure.kind not in {"missing_last_column", "missing_bottom_row", "missing_column", "missing_row"}:
+            continue
+        base = f"repair_internal_{failure.kind}_{idx}"
+        restored, restore_meta = _internal_dimension_restore_model(model, failure, f"{base}_dimension", source_provenance=source_provenance)
+        if restored is not None:
+            candidates.append((f"{base}_dimension", restored, {"failure": failure.to_json_dict(), **restore_meta}))
+        elif failure.kind in {"missing_bottom_row", "missing_last_column"}:
+            for repair_name, repaired, meta in _internal_scalar_extent_plus_one_models(
+                model,
+                failure,
+                f"{base}_scalar",
+                source_provenance=source_provenance,
+            ):
+                candidates.append((repair_name, repaired, {"failure": failure.to_json_dict(), **meta}))
+        else:
+            candidates.append((f"{base}_skipped", None, {"failure": failure.to_json_dict(), **restore_meta}))
+    return candidates
+
+
+def _static_cost_estimate(model) -> int | None:
+    try:
+        shapes = get_value_info_shapes(model)
+        graph_inputs = {vi.name for vi in model.graph.input}
+        graph_outputs = {vi.name for vi in model.graph.output}
+        init_names = {init.name for init in model.graph.initializer}
+        params = 0
+        for init in model.graph.initializer:
+            try:
+                params += int(numpy_helper.to_array(init).size)
+            except Exception:
+                continue
+        memory = 0
+        for name, shape in shapes.items():
+            if name in graph_inputs or name in graph_outputs or name in init_names:
+                continue
+            if not shape or any(dim is None for dim in shape):
+                continue
+            elem_type = get_tensor_elem_type(model, name)
+            if elem_type is None:
+                continue
+            numel = 1
+            for dim in shape:
+                numel *= int(dim)
+            memory += int(numel * tensor_dtype_size(elem_type))
+        return memory + params
+    except Exception:
+        return None
+
+
+def _repair_cost_gate(model, incumbent_cost: int, internal_or_dense: str) -> dict:
+    full_dense_initializers = []
+    for init in model.graph.initializer:
+        if tuple(int(dim) for dim in init.dims) == (1, 10, 30, 30):
+            full_dense_initializers.append(init.name)
+    graph_outputs = {out.name for out in model.graph.output}
+    full_volume_intermediates = [
+        name
+        for name, shape in get_value_info_shapes(model).items()
+        if shape == [1, 10, 30, 30] and name not in graph_outputs
+    ]
+    estimate = _static_cost_estimate(model)
+    reasons: list[str] = []
+    primary = internal_or_dense == "internal"
+    if internal_or_dense != "internal":
+        primary = False
+        reasons.append("fallback_not_primary_internal_repair")
+    if full_dense_initializers:
+        primary = False
+        reasons.append("full_output_dense_initializer")
+    if estimate is not None and estimate >= incumbent_cost:
+        primary = False
+        reasons.append("estimated_cost_not_below_incumbent")
+    if estimate is not None and estimate >= incumbent_cost * 3:
+        primary = False
+        reasons.append("estimated_cost_far_above_incumbent")
+    return {
+        "primary_repair": primary,
+        "estimated_cost": estimate,
+        "incumbent_cost": incumbent_cost,
+        "full_dense_initializers": full_dense_initializers,
+        "full_volume_intermediates": full_volume_intermediates[:12],
+        "reason": "|".join(reasons) if reasons else None,
+    }
+
+
 def _repair_shapes(task_dir: Path, diagnostics: dict) -> list[tuple[int, int]]:
     shapes: set[tuple[int, int]] = set()
     for failure in diagnostics.get("failures", []):
@@ -311,35 +695,101 @@ def _trim_pair_diagnostics(diagnostics: dict, max_failures: int = 5) -> dict:
     return out
 
 
-def _evaluate_repair(task_dir: Path, model, repair_name: str, out_dir: Path, config, cache: ValidationCache, incumbent_cost: int) -> dict:
+def _evaluate_repair(
+    task_dir: Path,
+    model,
+    repair_name: str,
+    out_dir: Path,
+    config,
+    cache: ValidationCache,
+    incumbent_cost: int,
+    *,
+    repair_family: str = "unknown",
+    failure_class: str | None = None,
+    internal_or_dense: str = "unknown",
+    repair_metadata: dict | None = None,
+) -> dict:
+    base_row = {
+        "repair": repair_name,
+        "repair_family": repair_family,
+        "failure_class": failure_class,
+        "internal_or_dense": internal_or_dense,
+        "source_model": (repair_metadata or {}).get("source_model"),
+        "source_mutation_family": (repair_metadata or {}).get("source_mutation_family"),
+        "repair_metadata": repair_metadata or {},
+        **_source_provenance_summary((repair_metadata or {}).get("source_mutations") or []),
+    }
     try:
         built = safe_build(model, allow_nonstrict_shapes=config.allow_nonstrict_shapes)
         if not built.ok or built.model is None:
-            return {"repair": repair_name, "ok": False, "error": built.error}
+            return {**base_row, "ok": False, "error": built.error}
+        cost_gate = _repair_cost_gate(built.model, incumbent_cost, internal_or_dense)
         repair_path = out_dir / f"{repair_name}.onnx"
         save_model(built.model, repair_path)
+        if not cost_gate.get("primary_repair") and not getattr(config, "keep_high_cost_probes", False):
+            return {
+                **base_row,
+                "repair": repair_name,
+                "ok": True,
+                "skipped": True,
+                "skip_reason": cost_gate.get("reason"),
+                "model_path": str(repair_path),
+                "model_file_exists": repair_path.exists(),
+                "estimated_repair_cost": cost_gate.get("estimated_cost"),
+                "cost_gate": cost_gate,
+                "primary_repair": False,
+                "pair_diagnostics": None,
+                "validation": None,
+                "public_wrong": None,
+                "arc_gen_wrong": None,
+                "fresh_right": None,
+                "fresh_total": None,
+                "actual_validation_cost": None,
+                "accepted": False,
+                "repaired": False,
+                "near_miss_category": None,
+                "delta_points": None,
+            }
         pair_diag = _trim_pair_diagnostics(run_pairs(task_dir, repair_path, sources="public,arc", comparison="official_public_arc"))
         validation = validate_model(task_dir, repair_path, config, cache)
         vdict = validation.to_json_dict()
         accepted = is_accepted(vdict, incumbent_cost, config)
         return {
+            **base_row,
             "repair": repair_name,
             "ok": True,
             "model_path": str(repair_path),
             "model_file_exists": repair_path.exists(),
+            "estimated_repair_cost": cost_gate.get("estimated_cost"),
+            "cost_gate": cost_gate,
+            "primary_repair": bool(cost_gate.get("primary_repair")),
             "pair_diagnostics": pair_diag,
             "validation": vdict,
+            "public_wrong": vdict.get("public_wrong"),
+            "arc_gen_wrong": vdict.get("arc_gen_wrong"),
+            "fresh_right": vdict.get("fresh_right"),
+            "fresh_total": vdict.get("fresh_total"),
+            "actual_validation_cost": vdict.get("cost"),
             "accepted": accepted,
             "repaired": accepted,
             "near_miss_category": near_miss_category(vdict, incumbent_cost, config),
             "delta_points": None if validation.cost is None else delta_points(incumbent_cost, validation.cost),
         }
     except Exception as exc:
-        return {"repair": repair_name, "ok": False, "error": f"{type(exc).__name__}: {exc}"}
+        return {**base_row, "ok": False, "error": f"{type(exc).__name__}: {exc}"}
 
 
-def _try_cleanup_repair(task_dir: Path, model_path: Path, out_dir: Path, config, cache: ValidationCache, incumbent_cost: int) -> list[dict]:
+def _try_cleanup_repair(
+    task_dir: Path,
+    model_path: Path,
+    out_dir: Path,
+    config,
+    cache: ValidationCache,
+    incumbent_cost: int,
+    source_provenance: list[dict] | None = None,
+) -> list[dict]:
     repairs: list[dict] = []
+    provenance_summary = _source_provenance_summary(source_provenance or [])
     try:
         model = load_model(model_path)
         built = safe_build(model, allow_nonstrict_shapes=config.allow_nonstrict_shapes)
@@ -350,9 +800,24 @@ def _try_cleanup_repair(task_dir: Path, model_path: Path, out_dir: Path, config,
         validation = validate_model(task_dir, repair_path, config, cache)
         row = {
             "repair": "cleanup_safe_build",
+            "repair_family": "cleanup",
+            "failure_class": None,
+            "internal_or_dense": "cleanup",
+            "source_model": str(model_path),
+            "source_mutation_family": None,
+            **provenance_summary,
+            "repair_metadata": {},
+            "estimated_repair_cost": None,
+            "cost_gate": {"primary_repair": False, "reason": "cleanup_fallback"},
+            "primary_repair": False,
             "ok": True,
             "model_path": str(repair_path),
             "validation": validation.to_json_dict(),
+            "public_wrong": validation.public_wrong,
+            "arc_gen_wrong": validation.arc_gen_wrong,
+            "fresh_right": validation.fresh_right,
+            "fresh_total": validation.fresh_total,
+            "actual_validation_cost": validation.cost,
             "accepted": is_accepted(validation.to_json_dict(), incumbent_cost, config),
             "near_miss_category": near_miss_category(validation.to_json_dict(), incumbent_cost, config),
             "delta_points": None if validation.cost is None else delta_points(incumbent_cost, validation.cost),
@@ -366,8 +831,75 @@ def _try_cleanup_repair(task_dir: Path, model_path: Path, out_dir: Path, config,
     return repairs
 
 
-def _try_mask_repairs(task_dir: Path, model_path: Path, diagnostics: dict, out_dir: Path, config, cache: ValidationCache, incumbent_cost: int) -> list[dict]:
+def _try_internal_selector_extent_repairs(
+    task_dir: Path,
+    model_path: Path,
+    diagnostics: dict,
+    out_dir: Path,
+    config,
+    cache: ValidationCache,
+    incumbent_cost: int,
+    source_provenance: list[dict] | None = None,
+) -> list[dict]:
     repairs: list[dict] = []
+    source_provenance = source_provenance or []
+    provenance_summary = _source_provenance_summary(source_provenance)
+    failures = classify_diagnostics(diagnostics)
+    model = load_model(model_path)
+    for repair_name, repaired, metadata in _internal_selector_extent_candidates(model, failures, source_provenance=source_provenance):
+        failure = metadata.get("failure") or {}
+        failure_class = failure.get("kind")
+        metadata = {**metadata, **provenance_summary}
+        if repaired is None:
+            repairs.append(
+                {
+                    "repair": repair_name,
+                    "repair_family": "internal_selector_extent",
+                    "failure_class": failure_class,
+                    "internal_or_dense": "internal",
+                    "source_model": str(model_path),
+                    "source_mutation_family": metadata.get("source_mutation_family"),
+                    **provenance_summary,
+                    "repair_metadata": metadata,
+                    "ok": False,
+                    "skipped": True,
+                    "skip_reason": metadata.get("reason", "no_internal_candidate"),
+                    "cost_gate": {"primary_repair": True, "reason": metadata.get("reason")},
+                    "primary_repair": True,
+                }
+            )
+            continue
+        metadata = {**metadata, "source_model": str(model_path)}
+        repairs.append(
+            _evaluate_repair(
+                task_dir,
+                repaired,
+                repair_name,
+                out_dir,
+                config,
+                cache,
+                incumbent_cost,
+                repair_family="internal_selector_extent",
+                failure_class=failure_class,
+                internal_or_dense="internal",
+                repair_metadata=metadata,
+            )
+        )
+    return repairs
+
+
+def _try_mask_repairs(
+    task_dir: Path,
+    model_path: Path,
+    diagnostics: dict,
+    out_dir: Path,
+    config,
+    cache: ValidationCache,
+    incumbent_cost: int,
+    source_provenance: list[dict] | None = None,
+) -> list[dict]:
+    repairs: list[dict] = []
+    provenance_summary = _source_provenance_summary(source_provenance or [])
     model = load_model(model_path)
     for h, w in _repair_shapes(task_dir, diagnostics):
         repairs.append(
@@ -379,6 +911,10 @@ def _try_mask_repairs(task_dir: Path, model_path: Path, diagnostics: dict, out_d
                 config,
                 cache,
                 incumbent_cost,
+                repair_family="shape_mask_fallback",
+                failure_class="shape_or_no_color",
+                internal_or_dense="final_output_symbolic",
+                repair_metadata={"source_model": str(model_path), "source_mutation_family": None, **provenance_summary},
             )
         )
         repairs.append(
@@ -390,13 +926,27 @@ def _try_mask_repairs(task_dir: Path, model_path: Path, diagnostics: dict, out_d
                 config,
                 cache,
                 incumbent_cost,
+                repair_family="shape_mask_fallback",
+                failure_class="extra_active_black_outside_shape",
+                internal_or_dense="dense_final_output",
+                repair_metadata={"source_model": str(model_path), "source_mutation_family": None, **provenance_summary},
             )
         )
     return repairs
 
 
-def _try_tiny_correction_repairs(task_dir: Path, model_path: Path, diagnostics: dict, out_dir: Path, config, cache: ValidationCache, incumbent_cost: int) -> list[dict]:
+def _try_tiny_correction_repairs(
+    task_dir: Path,
+    model_path: Path,
+    diagnostics: dict,
+    out_dir: Path,
+    config,
+    cache: ValidationCache,
+    incumbent_cost: int,
+    source_provenance: list[dict] | None = None,
+) -> list[dict]:
     repairs: list[dict] = []
+    provenance_summary = _source_provenance_summary(source_provenance or [])
     model = load_model(model_path)
     for idx, failure in enumerate(diagnostics.get("failures", [])[:4]):
         coords = failure.get("first_failing_coordinates") or []
@@ -413,13 +963,27 @@ def _try_tiny_correction_repairs(task_dir: Path, model_path: Path, diagnostics: 
                 config,
                 cache,
                 incumbent_cost,
+                repair_family="tiny_coordinate_fallback",
+                failure_class="coordinate_patch",
+                internal_or_dense="dense_final_output",
+                repair_metadata={"source_model": str(model_path), "source_mutation_family": None, "coordinate_count": len(coords), **provenance_summary},
             )
         )
     return repairs
 
 
-def _try_symbolic_line_repairs(task_dir: Path, model_path: Path, diagnostics: dict, out_dir: Path, config, cache: ValidationCache, incumbent_cost: int) -> list[dict]:
+def _try_symbolic_line_repairs(
+    task_dir: Path,
+    model_path: Path,
+    diagnostics: dict,
+    out_dir: Path,
+    config,
+    cache: ValidationCache,
+    incumbent_cost: int,
+    source_provenance: list[dict] | None = None,
+) -> list[dict]:
     repairs: list[dict] = []
+    provenance_summary = _source_provenance_summary(source_provenance or [])
     model = load_model(model_path)
     for idx, template in enumerate(_symbolic_missing_line_templates(diagnostics)):
         name = f"repair_symbolic_{template['kind']}_{idx}"
@@ -431,6 +995,10 @@ def _try_symbolic_line_repairs(task_dir: Path, model_path: Path, diagnostics: di
             config,
             cache,
             incumbent_cost,
+            repair_family="symbolic_line_fallback",
+            failure_class=template["kind"],
+            internal_or_dense="final_output_symbolic",
+            repair_metadata={"source_model": str(model_path), "source_mutation_family": None, "symbolic_template": template, **provenance_summary},
         )
         repair["symbolic_template"] = template
         repairs.append(repair)
@@ -446,15 +1014,19 @@ def try_repair_model(
     incumbent_cost: int,
     diagnostics: dict | None = None,
     max_repairs: int | None = None,
+    source_mutations: list[Any] | None = None,
+    source_provenance: list[dict] | None = None,
 ) -> list[dict]:
     diagnostics = diagnostics or run_pairs(task_dir, model_path, sources="public,arc", comparison="official_public_arc")
+    normalized_source = _normalize_source_mutations(source_mutations, source_provenance)
     out_dir.mkdir(parents=True, exist_ok=True)
     repairs: list[dict] = []
     for producer in (
-        lambda: _try_symbolic_line_repairs(task_dir, model_path, diagnostics, out_dir, config, cache, incumbent_cost),
-        lambda: _try_mask_repairs(task_dir, model_path, diagnostics, out_dir, config, cache, incumbent_cost),
-        lambda: _try_tiny_correction_repairs(task_dir, model_path, diagnostics, out_dir, config, cache, incumbent_cost),
-        lambda: _try_cleanup_repair(task_dir, model_path, out_dir, config, cache, incumbent_cost),
+        lambda: _try_internal_selector_extent_repairs(task_dir, model_path, diagnostics, out_dir, config, cache, incumbent_cost, normalized_source),
+        lambda: _try_symbolic_line_repairs(task_dir, model_path, diagnostics, out_dir, config, cache, incumbent_cost, normalized_source),
+        lambda: _try_mask_repairs(task_dir, model_path, diagnostics, out_dir, config, cache, incumbent_cost, normalized_source),
+        lambda: _try_tiny_correction_repairs(task_dir, model_path, diagnostics, out_dir, config, cache, incumbent_cost, normalized_source),
+        lambda: _try_cleanup_repair(task_dir, model_path, out_dir, config, cache, incumbent_cost, normalized_source),
     ):
         if max_repairs is not None and len(repairs) >= max_repairs:
             break

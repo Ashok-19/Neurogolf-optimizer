@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 import json
 import subprocess
 from pathlib import Path
@@ -87,16 +88,16 @@ def validate_model(
         h = model_hash(model_path)
     except Exception as exc:
         return _empty_result(task, str(model_path), 99, "", "", f"hash failure: {type(exc).__name__}: {exc}")
-    profile = validation_cache_profile(config)
-    if cache is not None:
-        cached = cache.get(task, h, profile)
-        if cached is not None:
-            return cached
     rel_model = model_path
     try:
         rel_model = model_path.relative_to(task_dir)
     except ValueError:
         pass
+    profile = validation_cache_profile(config)
+    if cache is not None:
+        cached = cache.get(task, h, profile)
+        if cached is not None:
+            return replace(cached, model_path=str(rel_model))
     cmd = ["python3.12", "validate_task.py", "--model", str(rel_model)]
     if config.validation_mode == "full":
         cmd.append("--all")

@@ -3,10 +3,12 @@ import tempfile
 import unittest
 
 from neurogolf_optimizer.cache import ValidationCache
+from neurogolf_optimizer.graph_utils import model_hash
 from neurogolf_optimizer.inspect_results import _rows
 from neurogolf_optimizer.models import Candidate, OptimizerConfig, TaskContext, ValidationResult
 from neurogolf_optimizer.optimizer import NeuroGolfOptimizer
 from neurogolf_optimizer.reporting import write_json, write_run_report
+from neurogolf_optimizer.validate import validate_model, validation_cache_profile
 
 
 class IntegrationControlTests(unittest.TestCase):
@@ -32,6 +34,22 @@ class IntegrationControlTests(unittest.TestCase):
             self.assertEqual(cache.get("task000", "abc", "full").cost, 9)
             self.assertIsNone(cache.get("task000", "abc", "missing"))
             self.assertEqual(cache.stats()["profiles"], 2)
+            cache.close()
+
+    def test_cached_validation_result_reports_current_model_path(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            task_dir = root / "task000"
+            model_path = task_dir / "experiments" / "repair_current.onnx"
+            model_path.parent.mkdir(parents=True)
+            model_path.write_bytes(b"same-model-bytes")
+            cfg = OptimizerConfig(repo_root=root)
+            cache = ValidationCache(root / "cache")
+            cached = ValidationResult("task000", "experiments/old_run/repair.onnx", 1, 0, 1, 0, 200, 200, 1, 2, 3, 24.0, True, 0, "{}", "", None)
+            cache.put("task000", model_hash(model_path), cached, validation_cache_profile(cfg))
+            result = validate_model(task_dir, model_path, cfg, cache)
+            self.assertEqual(result.model_path, "experiments/repair_current.onnx")
+            self.assertEqual(cache.get("task000", model_hash(model_path), validation_cache_profile(cfg)).model_path, "experiments/old_run/repair.onnx")
             cache.close()
 
     def test_report_does_not_overwrite_summary_json(self):

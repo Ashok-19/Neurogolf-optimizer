@@ -36,6 +36,10 @@ class MutationGenerationTests(unittest.TestCase):
     def test_where_ablation_discovers_two_branches(self):
         muts = WhereAblation().discover(ctx(), make_where_model())
         self.assertEqual(len(muts), 2)
+        self.assertIn("condition_tensor", muts[0].metadata)
+        self.assertIn("selected_branch_tensor", muts[0].metadata)
+        self.assertIn("dropped_branch_tensor", muts[0].metadata)
+        self.assertIn("output_shape", muts[0].metadata)
         result = WhereAblation().apply(ctx(), make_where_model(), muts[0])
         self.assertTrue(result.ok, result.error)
 
@@ -90,7 +94,10 @@ class MutationGenerationTests(unittest.TestCase):
         model.graph.node[-1].input[0] = "w2"
         muts = WhereCombo().discover(c, model)
         self.assertTrue(any(len(m.metadata["choices"]) >= 2 for m in muts))
-        result = WhereCombo().apply(c, model, next(m for m in muts if len(m.metadata["choices"]) >= 2))
+        combo = next(m for m in muts if len(m.metadata["choices"]) >= 2)
+        self.assertEqual(len(combo.metadata["choice_metadata"]), len(combo.metadata["choices"]))
+        self.assertIn("metadata", combo.metadata["choice_metadata"][0])
+        result = WhereCombo().apply(c, model, combo)
         self.assertTrue(result.ok, result.error)
 
     def test_gather_shrink_remaps_indices(self):
@@ -174,6 +181,24 @@ class MutationGenerationTests(unittest.TestCase):
         self.assertTrue(any(m.metadata.get("axis") == "row" and m.metadata.get("new_len") == 17 for m in muts))
         result = DimensionSweep().apply(c, model, next(m for m in muts if m.metadata.get("axis") == "row" and m.metadata.get("new_len") == 17))
         self.assertTrue(result.ok, result.error)
+
+    def test_dimension_sweep_metadata_records_repair_provenance(self):
+        idx = numpy_helper.from_array(np.arange(6, dtype=np.int32), name="idx6")
+        col_grid = numpy_helper.from_array(np.arange(6, dtype=np.int32).reshape(1, 1, 1, 6), name="col_grid")
+        pads = numpy_helper.from_array(np.array([0, 0, 0, 0, 0, 0, 24, 24], dtype=np.int64), name="pad_to_30_i64")
+        one = numpy_helper.from_array(np.array([0], dtype=np.int32), name="zero")
+        y = helper.make_tensor_value_info("col_idx_raw", TensorProto.INT32, [6])
+        node = helper.make_node("Add", ["idx6", "zero"], ["col_idx_raw"], name="col_idx_raw")
+        graph = helper.make_graph([node], "dim", [], [y], [idx, col_grid, pads, one])
+        model = helper.make_model(graph, opset_imports=[helper.make_operatorsetid("", 18)])
+        muts = DimensionSweep().discover(ctx(), model)
+        self.assertTrue(muts)
+        meta = muts[0].metadata
+        self.assertEqual(meta["axis"], "col")
+        self.assertEqual(meta["old_len"], 6)
+        self.assertIn("source_initializer", meta)
+        self.assertIn("related_axis_initializers", meta)
+        self.assertIn("pad_to_30_change", meta)
 
 
 if __name__ == "__main__":

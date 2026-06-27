@@ -42,3 +42,206 @@
   - Accepted gain unchanged.
   - Projected score remains 7157.530543944447.
   - This is not 7900+ ready.
+
+## 2026-06-27: Failure-guided internal selector/extent repair
+
+- Added `repair_classification.py` with reusable pair-diagnostic failure classification.
+  - Covers `missing_last_column`, `missing_column`, `missing_bottom_row`, `missing_row`, `missing_border`, `wrong_color_region`, `missing_object_pixels`, and `extra_active_black_outside_shape`.
+- Added an internal-first repair path in `near_miss_lab.py`.
+  - Runs before symbolic/final-output fallback repairs.
+  - For dimension-sweep-style line loss, restores only the affected row/col arange and matching `pad_to_30_i64` extent.
+  - Reuses an existing target-length arange initializer when available instead of cloning a new one.
+  - For bottom-row extent loss with no shortened arange, tries a conservative scalar extent `+1` internal candidate.
+- Added pre-validation repair cost/risk reporting.
+  - Repair rows now include `repair_family`, `failure_class`, `internal_or_dense`, `source_mutation_family`, `estimated_repair_cost`, `actual_validation_cost`, `primary_repair`, and `cost_gate`.
+  - Dense/full-output fallback repairs are marked non-primary.
+  - Full `[1,10,30,30]` replacement initializers and very high estimated costs are reported in `cost_gate`.
+- Enriched mutation provenance.
+  - `dimension_sweep`: source arange initializer, old/new len, axis, related axis initializers, pad old/new values.
+  - `where_ablation`: condition tensor, selected/dropped branch tensors, output/dropped shape, graph-output flag.
+  - `where_combo`: explicit per-choice metadata.
+
+Validation:
+
+```text
+PYTHONPATH=.chatgpt/operations python3.12 -m compileall -q .chatgpt/operations/neurogolf_optimizer
+passed
+
+PYTHONPATH=.chatgpt/operations python3.12 -m unittest discover -s .chatgpt/operations/neurogolf_optimizer/tests -q
+Ran 61 tests in 26.552s
+OK
+```
+
+Sentinel probes:
+
+```text
+task014/experiments/attempt2.onnx
+incumbent cost: 7983
+near miss input: public_wrong=0, arc_gen_wrong=1, fresh=200/200, cost=7905
+
+repair_internal_missing_last_column_0_dimension:
+  family: internal_selector_extent
+  class: missing_last_column
+  internal_or_dense: internal
+  source_mutation_family: dimension_sweep_inferred
+  result: public_wrong=0, arc_gen_wrong=0, fresh=200/200, cost=7983
+  accepted: false
+  blocker: exact but cost equals incumbent; needs cost below 7983
+
+repair_symbolic_missing_last_column_0:
+  internal_or_dense: final_output_symbolic
+  primary_repair: false
+  cost_gate: fallback_not_primary_internal_repair|estimated_cost_far_above_incumbent
+  result: public_wrong=0, arc_gen_wrong=3, fresh=200/200, cost=85000
+```
+
+```text
+task396/experiments/ablate_141_else.onnx
+incumbent cost: 27662
+near miss input: public_wrong=0, arc_gen_wrong=3, fresh=199/200, cost=27441
+
+repair_internal_missing_bottom_row_0_scalar_0:
+  family: internal_selector_extent
+  class: missing_bottom_row
+  internal_or_dense: internal
+  source_mutation_family: where_ablation_inferred
+  result: public_wrong=4, arc_gen_wrong=260, fresh=163/200, cost=27444
+  accepted: false
+  blocker: scalar +1 extent is too broad and activates pixels outside true output shapes
+
+symbolic/dense fallbacks:
+  marked primary_repair=false
+  high-cost symbolic bottom-row repairs cost 84667
+  dense channel-0 fallback repairs report full_output_dense_initializer
+```
+
+Focused optimizer probe:
+
+```text
+python3.12 .chatgpt/operations/neurogolf_optimizer/run_one.py \
+  --task task014 \
+  --families dimension_sweep \
+  --trials 50 \
+  --fresh-min 0.90 \
+  --dry-run \
+  --keep-rejected \
+  --run-id internal_selector_repair_probe \
+  --timeout 1200
+
+interrupted after roughly 9 minutes for runtime
+state at interruption: 46 trials, 0 accepted, 13 near misses
+```
+
+Accepted gains:
+
+```text
+none
+projected score remains 7157.530543944447
+```
+
+Why this moves toward 7900+:
+
+- The repair system now repairs task014's known missing final column internally and exactly, without a dense final-output patch.
+- The current blocker is cost, not correctness, for task014.
+- The task396 probe shows the first scalar extent restoration is too broad, giving the next concrete selector-narrowing target.
+- High-cost final-output repairs are no longer treated as primary score candidates.
+
+## 2026-06-27: Internal repair gate/provenance/reporting correction
+
+- Made the repair cost gate actionable.
+  - Equal-cost or worse estimated repairs are now non-primary with `estimated_cost_not_below_incumbent`.
+  - Non-internal fallback repairs remain non-primary with `fallback_not_primary_internal_repair`.
+  - Full-output dense initializers remain non-primary with `full_output_dense_initializer`.
+  - Non-primary repairs skip pair diagnostics and official validation unless `--keep-high-cost-probes` is set.
+- Passed source mutation provenance from optimizer near-miss repair into `try_repair_model`.
+  - Repair rows now include `source_mutations`, `source_mutation_families`, and `source_mutation_ids`.
+  - Internal repair prefers actual mutation metadata when present; standalone near-miss lab can still use inferred provenance.
+- Fixed cached validation reporting.
+  - Cached `ValidationResult` objects now report the current requested `model_path` without changing the validation cache key or stored cache entry.
+
+Validation:
+
+```text
+PYTHONPATH=.chatgpt/operations python3.12 -m compileall -q .chatgpt/operations/neurogolf_optimizer
+passed
+
+PYTHONPATH=.chatgpt/operations python3.12 -m unittest discover -s .chatgpt/operations/neurogolf_optimizer/tests -q
+Ran 66 tests in 27.731s
+OK
+```
+
+Sentinel probes:
+
+```text
+task014 normal repair probe
+run_dir: task014/experiments/near_miss_lab/20260627_234111
+
+repair_internal_missing_last_column_0_dimension:
+  family: internal_selector_extent
+  class: missing_last_column
+  estimated_cost: 7983
+  incumbent_cost: 7983
+  primary_repair: false
+  skipped: true
+  skip_reason: estimated_cost_not_below_incumbent
+  validation: null
+  accepted: false
+
+fallback symbolic/dense repairs:
+  skipped as non-primary unless cleanup
+  dense/full-output repairs report full_output_dense_initializer where applicable
+```
+
+```text
+task014 with --keep-high-cost-probes
+run_dir: task014/experiments/near_miss_lab/20260627_234140
+
+repair_internal_missing_last_column_0_dimension:
+  primary_repair: false
+  cost_gate: estimated_cost_not_below_incumbent
+  validation ran
+  public_wrong: 0
+  arc_gen_wrong: 0
+  fresh: 200/200
+  cost: 7983
+  accepted: false
+  blocker: equal to incumbent, not below it
+```
+
+```text
+task396 normal repair probe
+run_dir: task396/experiments/near_miss_lab/20260627_234235
+
+near miss input:
+  public_wrong: 0
+  arc_gen_wrong: 3
+  fresh: 199/200
+  cost: 27441
+  incumbent_cost: 27662
+
+internal missing_bottom_row scalar repairs:
+  primary_repair: true
+  cost: 27444
+  public_wrong: 4
+  arc_gen_wrong: 260
+  fresh: 163/200
+  accepted: false
+  blocker: scalar extent restoration is still too broad
+
+symbolic/dense fallbacks:
+  skipped as non-primary
+  high-cost/full-output reasons include fallback_not_primary_internal_repair,
+  estimated_cost_not_below_incumbent, estimated_cost_far_above_incumbent,
+  and full_output_dense_initializer where applicable
+```
+
+Accepted gains:
+
+```text
+none
+projected score remains 7157.530543944447
+```
+
+Remaining blocker:
+
+- The cost/reporting behavior is now correct, but the internal repair family still needs a lower-cost exact task014 variant or a narrower task396 selector repair before it changes projected score.

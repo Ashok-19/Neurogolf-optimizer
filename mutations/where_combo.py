@@ -25,6 +25,15 @@ class WhereCombo(BaseMutationFamily):
                 if len(set(outputs)) != len(outputs):
                     continue
                 choices = [m.metadata for m in combo]
+                choice_metadata = [
+                    {
+                        "mutation_id": m.id,
+                        "family": m.family,
+                        "description": m.description,
+                        "metadata": m.metadata,
+                    }
+                    for m in combo
+                ]
                 priority = sum(m.priority for m in combo) / size + size * 25
                 savings = sum(m.estimated_savings or 0 for m in combo)
                 muts.append(
@@ -34,7 +43,12 @@ class WhereCombo(BaseMutationFamily):
                         description="combine " + "; ".join(m.description for m in combo),
                         priority=priority,
                         estimated_savings=savings,
-                        metadata={"choices": choices, "single_ids": [m.id for m in combo], "combo_size": size},
+                        metadata={
+                            "choices": choices,
+                            "choice_metadata": choice_metadata,
+                            "single_ids": [m.id for m in combo],
+                            "combo_size": size,
+                        },
                     )
                 )
                 if len(muts) >= task.config.max_candidates_per_family:

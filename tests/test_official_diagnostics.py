@@ -6,7 +6,7 @@ from unittest import mock
 
 import numpy as np
 
-from neurogolf_optimizer.models import Candidate, OptimizerConfig, ValidationResult
+from neurogolf_optimizer.models import Candidate, Mutation, OptimizerConfig, ValidationResult
 from neurogolf_optimizer.near_miss_lab import _symbolic_missing_line_templates, _try_mask_repairs, _try_symbolic_line_repairs
 from neurogolf_optimizer.optimizer import NeuroGolfOptimizer
 from neurogolf_optimizer.pair_runner import _compare_pair, classify_tensor_diff
@@ -114,7 +114,7 @@ class OfficialDiagnosticsTests(unittest.TestCase):
             with mock.patch("neurogolf_optimizer.near_miss_lab.load_model", return_value=object()), \
                 mock.patch("neurogolf_optimizer.near_miss_lab._output_shape_mask_model", return_value=object()), \
                 mock.patch("neurogolf_optimizer.near_miss_lab._channel0_outside_mask_model", return_value=object()), \
-                mock.patch("neurogolf_optimizer.near_miss_lab._evaluate_repair", side_effect=lambda *args: {"repair": args[2]}):
+                mock.patch("neurogolf_optimizer.near_miss_lab._evaluate_repair", side_effect=lambda *args, **_kwargs: {"repair": args[2]}):
                 repairs = _try_mask_repairs(task_dir, Path("m.onnx"), diagnostics, Path(tmp), OptimizerConfig(repo_root=Path(tmp)), mock.Mock(), 100)
         self.assertTrue(any(r["repair"].startswith("repair_no_color_outside") for r in repairs))
         self.assertFalse(all(r["repair"] == "cleanup_safe_build" for r in repairs))
@@ -172,7 +172,7 @@ class OfficialDiagnosticsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             with mock.patch("neurogolf_optimizer.near_miss_lab.load_model", return_value=object()), \
                 mock.patch("neurogolf_optimizer.near_miss_lab._symbolic_missing_line_patch_model", return_value=object()), \
-                mock.patch("neurogolf_optimizer.near_miss_lab._evaluate_repair", side_effect=lambda *args: {"repair": args[2]}):
+                mock.patch("neurogolf_optimizer.near_miss_lab._evaluate_repair", side_effect=lambda *args, **_kwargs: {"repair": args[2]}):
                 repairs = _try_symbolic_line_repairs(Path(tmp) / "task000", Path("m.onnx"), diagnostics, Path(tmp), OptimizerConfig(repo_root=Path(tmp)), mock.Mock(), 100)
         self.assertTrue(repairs)
         self.assertTrue(repairs[0]["repair"].startswith("repair_symbolic_missing_last_column"))
@@ -193,7 +193,15 @@ class OfficialDiagnosticsTests(unittest.TestCase):
             ctx.task_dir = task_dir
             ctx.run_dir = run_dir
             ctx.config = cfg
-            cand = Candidate("task000", "parent", str(source), [], None, None, "h0", 90, 1.0, False, True, "A")
+            source_mutation = Mutation(
+                "dimension_sweep:test",
+                "dimension_sweep",
+                "reduce col work dimension",
+                1.0,
+                1,
+                {"axis": "col", "old_len": 18, "new_len": 17, "source_initializer": "idx18_i32"},
+            )
+            cand = Candidate("task000", "parent", str(source), [source_mutation], None, None, "h0", 90, 1.0, False, True, "A")
             repair = {
                 "ok": True,
                 "repair": "repair_tiny_coordinate_patch_0",
@@ -213,11 +221,12 @@ class OfficialDiagnosticsTests(unittest.TestCase):
                     "returncode": 0,
                 },
             }
-            with mock.patch("neurogolf_optimizer.optimizer.try_repair_model", return_value=[repair]):
+            with mock.patch("neurogolf_optimizer.optimizer.try_repair_model", return_value=[repair]) as repair_mock:
                 out = NeuroGolfOptimizer(cfg, run_id="r1")._near_miss_repair_candidates(opt_ctx, cand, 100)
         self.assertEqual(len(out), 1)
         self.assertTrue(out[0].accepted)
         self.assertEqual(out[0].mutations[-1].family, "near_miss_repair")
+        self.assertEqual(repair_mock.call_args.kwargs["source_mutations"], [source_mutation])
 
 
 if __name__ == "__main__":
