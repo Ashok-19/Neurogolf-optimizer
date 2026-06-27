@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+
+# Generated validation/campaign artifacts.
+cache/
+runs/
+score_gain_runs/
+synthesis_audit/
+
+# Local environment/editor state.
+.venv/
+.env
+.DS_Store
