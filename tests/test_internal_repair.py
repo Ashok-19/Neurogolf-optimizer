@@ -8,11 +8,16 @@ from onnx import TensorProto, helper, numpy_helper
 
 from neurogolf_optimizer.models import OptimizerConfig, ValidationResult
 from neurogolf_optimizer.near_miss_lab import (
+    _dedup_initializers,
     _evaluate_repair,
+    _internal_gated_expected_extent_models,
     _internal_dimension_restore_model,
+    _post_repair_cleanup_models,
     _repair_cost_gate,
+    _repair_diagnostic_labels,
     try_repair_model,
 )
+from neurogolf_optimizer.graph_utils import safe_build, initializer_arrays
 from neurogolf_optimizer.repair_classification import FailureClass, classify_diagnostics
 
 
@@ -79,6 +84,25 @@ def make_cost_one_model():
     y = helper.make_tensor_value_info("y", TensorProto.FLOAT, [1])
     node = helper.make_node("Identity", ["value"], ["y"], name="out")
     graph = helper.make_graph([node], "cost_one", [], [y], [value])
+    return helper.make_model(graph, opset_imports=[helper.make_operatorsetid("", 18)])
+
+
+def make_gated_extent_model():
+    coord = numpy_helper.from_array(np.arange(3, dtype=np.float32).reshape(3, 1), name="row_coord")
+    extent = numpy_helper.from_array(np.array([3.0], dtype=np.float32), name="extent")
+    cond = numpy_helper.from_array(np.array([True], dtype=np.bool_), name="selector")
+    y = helper.make_tensor_value_info("mask", TensorProto.BOOL, [3, 1])
+    node = helper.make_node("Less", ["row_coord", "extent"], ["mask"], name="row_less")
+    graph = helper.make_graph([node], "gated_extent", [], [y], [coord, extent, cond])
+    return helper.make_model(graph, opset_imports=[helper.make_operatorsetid("", 18)])
+
+
+def make_duplicate_initializer_model():
+    a = numpy_helper.from_array(np.array([1], dtype=np.float32), name="a")
+    b = numpy_helper.from_array(np.array([1], dtype=np.float32), name="b")
+    y = helper.make_tensor_value_info("y", TensorProto.FLOAT, [1])
+    node = helper.make_node("Add", ["a", "b"], ["y"], name="add")
+    graph = helper.make_graph([node], "dup", [], [y], [a, b])
     return helper.make_model(graph, opset_imports=[helper.make_operatorsetid("", 18)])
 
 
@@ -162,6 +186,69 @@ class InternalRepairTests(unittest.TestCase):
         gate = _repair_cost_gate(make_cost_one_model(), incumbent_cost=1, internal_or_dense="internal")
         self.assertFalse(gate["primary_repair"])
         self.assertIn("estimated_cost_not_below_incumbent", gate["reason"])
+
+    def test_cost_positive_gate_primary_only_below_incumbent(self):
+        built = safe_build(make_cost_one_model()).model
+        estimate = _repair_cost_gate(built, incumbent_cost=999, internal_or_dense="internal")["estimated_cost"]
+        self.assertTrue(_repair_cost_gate(built, incumbent_cost=int(estimate) + 1, internal_or_dense="internal")["primary_repair"])
+        self.assertFalse(_repair_cost_gate(built, incumbent_cost=int(estimate), internal_or_dense="internal")["primary_repair"])
+
+    def test_gated_expected_extent_candidate_uses_source_condition(self):
+        failure = FailureClass(kind="missing_bottom_row", rows=[3], cols=[0], channels=[2], expected_shape=[4, 1])
+        source = [{"id": "where_ablation:1", "family": "where_ablation", "metadata": {"condition_tensor": "selector"}}]
+        repairs = _internal_gated_expected_extent_models(make_gated_extent_model(), failure, "repair_gated", source_provenance=source)
+        self.assertTrue(repairs)
+        name, repaired, meta = repairs[0]
+        self.assertIn("gated_expected", name)
+        self.assertEqual(meta["strategy"], "gated_expected_extent")
+        self.assertEqual(meta["selector_condition"], "selector")
+        self.assertEqual(meta["target_len"], 4)
+        built = safe_build(repaired)
+        self.assertTrue(built.ok, built.error)
+        gate = _repair_cost_gate(built.model, incumbent_cost=999, internal_or_dense="internal")
+        self.assertTrue(gate["primary_repair"])
+
+    def test_post_repair_cleanup_chain_records_costs_and_steps(self):
+        variants = _post_repair_cleanup_models(make_cost_one_model(), "repair_exact", base_estimated_cost=1)
+        self.assertGreaterEqual(len(variants), 2)
+        for name, _model, meta in variants:
+            self.assertTrue(name.startswith("repair_exact_cleanup_"))
+            self.assertEqual(meta["repair_chain"][0], "repair_exact")
+            self.assertEqual(meta["cost_before_cleanup"], 1)
+            self.assertTrue(meta["post_repair_cleanup_steps"])
+
+    def test_initializer_dedup_after_repair_keeps_required_tensor(self):
+        deduped, replacements = _dedup_initializers(make_duplicate_initializer_model())
+        self.assertEqual(replacements, ["b->a"])
+        built = safe_build(deduped)
+        self.assertTrue(built.ok, built.error)
+        arrays = initializer_arrays(built.model)
+        self.assertIn("a", arrays)
+        self.assertNotIn("b", arrays)
+        self.assertEqual(list(built.model.graph.node[0].input), ["a", "a"])
+
+    def test_equal_cost_exact_repair_can_produce_cleanup_variants(self):
+        failure = FailureClass(kind="missing_last_column", rows=list(range(7)), cols=[17], channels=[5], expected_shape=[7, 18])
+        repaired, meta = _internal_dimension_restore_model(make_axis_restore_model(), failure, "repair")
+        self.assertIsNotNone(repaired, meta)
+        variants = _post_repair_cleanup_models(repaired, "repair_internal_missing_last_column_0_dimension", base_estimated_cost=7983)
+        self.assertTrue(any("cleanup_prune" in name for name, _model, _meta in variants))
+        self.assertTrue(any("cleanup_dedup" in name for name, _model, _meta in variants))
+
+    def test_selector_too_broad_label_for_extra_black_after_bottom_row_repair(self):
+        pair_diag = {
+            "failures": [
+                {
+                    "extra_active_channels": 1,
+                    "first_failing_coordinates": [
+                        {"reason": ["extra_active_channel_0_outside_expected_output_shape"]}
+                    ],
+                }
+            ]
+        }
+        labels = _repair_diagnostic_labels(pair_diag, "missing_bottom_row", "internal")
+        self.assertIn("extra_active_black_outside_shape", labels)
+        self.assertIn("selector_too_broad", labels)
 
     def test_evaluate_repair_skips_non_primary_without_high_cost_probes(self):
         cfg = OptimizerConfig(repo_root=Path("."), keep_high_cost_probes=False)

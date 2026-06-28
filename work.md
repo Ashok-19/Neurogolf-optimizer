@@ -245,3 +245,130 @@ projected score remains 7157.530543944447
 Remaining blocker:
 
 - The cost/reporting behavior is now correct, but the internal repair family still needs a lower-cost exact task014 variant or a narrower task396 selector repair before it changes projected score.
+
+## 2026-06-28: Feature 1B cost-positive internal repair completion
+
+- Added a gated expected-extent internal repair variant for selector/extent near misses.
+  - For missing bottom-row/row failures, the repair can replace a broad scalar `+1` with `Where(selector, Max(old_extent, expected_extent), old_extent)`.
+  - The selector comes from source `where_ablation`/`where_combo` provenance when available, with a local scalar-Where inference fallback for standalone near-miss lab runs.
+  - This is reusable selector restoration, not a dense final-output patch.
+- Added bounded post-repair cleanup chains for internal repairs.
+  - Variants record `repair_chain`, `post_repair_cleanup_steps`, `cost_before_cleanup`, `cost_after_cleanup`, and `accepted_after_cleanup`.
+  - Cleanup is limited to prune/unreachable cleanup, unused initializer/value-info removal, and initializer dedup.
+- Added compact repair cost diagnostics.
+  - Repair rows now report source-vs-candidate params, memory, cost delta, largest initializer/intermediate contributors, full-volume intermediate count, and unused initializers.
+  - Broad internal selector failures are labeled with `selector_too_broad` when pair diagnostics show extra active black/outside-shape behavior.
+- Carried repair-chain and cost-diagnostic metadata through optimizer-created near-miss repair candidates.
+
+Validation:
+
+```text
+PYTHONPATH=.chatgpt/operations python3.12 -m compileall -q .chatgpt/operations/neurogolf_optimizer
+passed
+
+PYTHONPATH=.chatgpt/operations python3.12 -m unittest discover -s .chatgpt/operations/neurogolf_optimizer/tests -q
+Ran 72 tests in 25.968s
+OK
+```
+
+Sentinel probes:
+
+```text
+task014 normal repair probe
+run_dir: task014/experiments/near_miss_lab/20260628_002131
+
+near miss input:
+  public_wrong: 0
+  arc_gen_wrong: 1
+  fresh: 200/200
+  cost: 7905
+  incumbent_cost: 7983
+
+repair_internal_missing_last_column_0_dimension:
+  exact repair remains cost-gated
+  estimated_cost: 7983
+  primary_repair: false
+  skipped: true
+  skip_reason: estimated_cost_not_below_incumbent
+  cost delta explanation: +78 total vs near miss
+    params: +1
+    memory: +77
+    main contributors: 17x17 -> 17x18 class/inside/rect/shifted tensors
+
+cleanup variants:
+  repair_internal_missing_last_column_0_dimension_cleanup_prune
+  repair_internal_missing_last_column_0_dimension_cleanup_dedup
+  result: both remain estimated_cost 7983 and are skipped as equal-cost
+```
+
+```text
+task396 normal repair probe
+run_dir: task396/experiments/near_miss_lab/20260628_002204
+
+near miss input:
+  public_wrong: 0
+  arc_gen_wrong: 3
+  fresh: 199/200
+  cost: 27441
+  incumbent_cost: 27662
+
+repair_internal_missing_bottom_row_0_gated_extent_0_gated_expected_0:
+  family: internal_selector_extent
+  strategy: gated_expected_extent
+  accepted: true
+  public_wrong: 0
+  arc_gen_wrong: 0
+  fresh: 200/200
+  cost: 27446
+  delta_points: 0.007839192355074687
+  cost delta vs near miss: +5
+    params: +1
+    memory: +4
+    nodes: +2
+
+older broad scalar repair:
+  cost: 27444
+  public_wrong: 4
+  arc_gen_wrong: 260
+  fresh: 163/200
+  labels: selector_too_broad, extra_active_black_outside_shape
+```
+
+Promotion:
+
+```text
+python3.12 .chatgpt/operations/neurogolf_optimizer/near_miss_lab.py \
+  --task task396 \
+  --model task396/experiments/ablate_141_else.onnx \
+  --fresh-min 0.90 \
+  --repair \
+  --promote \
+  --keep-rejected \
+  --timeout 1200
+
+promoted through existing near_miss_lab promotion path:
+  repair_internal_missing_bottom_row_0_gated_extent_0_gated_expected_0
+  task396/experiments/candidate.onnx now validates:
+    public_wrong: 0
+    arc_gen_wrong: 0
+    fresh: 200/200
+    cost: 27446
+```
+
+Accepted gains:
+
+```text
+task396: 27662 -> 27446
+delta_points: 0.007839192355074687
+```
+
+Projected score:
+
+```text
+7157.530543944447 -> 7157.538383136803
+```
+
+Remaining blockers:
+
+- task014 is still correctness-solved but not cost-positive; its exact internal repair costs +78 over the near miss and equals incumbent.
+- The projected score moved, but the gain is still tiny relative to the 7900+ target; more near-miss conversions are needed.

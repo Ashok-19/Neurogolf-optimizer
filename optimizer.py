@@ -293,6 +293,13 @@ class NeuroGolfOptimizer:
                     "actual_validation_cost": repair.get("actual_validation_cost"),
                     "primary_repair": repair.get("primary_repair"),
                     "cost_gate": repair.get("cost_gate"),
+                    "repair_chain": repair.get("repair_chain"),
+                    "post_repair_cleanup_steps": repair.get("post_repair_cleanup_steps"),
+                    "cost_before_cleanup": repair.get("cost_before_cleanup"),
+                    "cost_after_cleanup": repair.get("cost_after_cleanup"),
+                    "accepted_after_cleanup": repair.get("accepted_after_cleanup"),
+                    "repair_diagnostic_labels": repair.get("repair_diagnostic_labels"),
+                    "cost_diagnostics": repair.get("cost_diagnostics"),
                     "repair_metadata": repair.get("repair_metadata"),
                 },
             )
