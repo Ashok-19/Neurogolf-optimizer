@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import copy
 import json
-import shutil
 import sys
 import time
 from pathlib import Path
@@ -33,8 +32,8 @@ from .graph_utils import (
     set_initializer,
     tensor_dtype_size,
 )
-from .locking import TaskLock
 from .pair_runner import run_pairs
+from .promotion import promote_candidate
 from .repair_classification import FailureClass, classify_diagnostics
 from .reporting import write_json
 from .scoring import delta_points, is_accepted, near_miss_category
@@ -1352,24 +1351,25 @@ def try_repair_model(
 def _maybe_promote(task_dir: Path, repair: dict, config, incumbent_cost: int, cache: ValidationCache) -> bool:
     if config.dry_run or not config.promote or not repair.get("accepted"):
         return False
-    src = Path(repair["model_path"])
-    experiments = task_dir / "experiments"
-    target = experiments / "candidate.onnx"
-    with TaskLock(experiments):
-        fresh = validate_model(task_dir, src, config, cache)
-        if not is_accepted(fresh.to_json_dict(), incumbent_cost, config):
-            return False
-        current_cost = incumbent_cost
-        if target.exists():
-            current = validate_model(task_dir, target, config, cache)
-            if is_accepted(current.to_json_dict(), incumbent_cost, config):
-                current_cost = int(current.cost or current_cost)
-        if fresh.cost is None or fresh.cost >= current_cost:
-            return False
-        if target.exists():
-            shutil.copy2(target, experiments / f"candidate_prev_{time.strftime('%Y%m%d_%H%M%S')}.onnx")
-        shutil.copy2(src, target)
-        return True
+    metadata = {
+        "repair_family": repair.get("repair_family"),
+        "repair_name": repair.get("repair"),
+        "repair_chain": repair.get("repair_chain"),
+        "source_mutation_family": repair.get("source_mutation_family"),
+        "near_miss_lab_repair": {
+            "failure_class": repair.get("failure_class"),
+            "internal_or_dense": repair.get("internal_or_dense"),
+            "source_model": repair.get("source_model"),
+            "actual_validation_cost": repair.get("actual_validation_cost"),
+            "primary_repair": repair.get("primary_repair"),
+        },
+    }
+    result = promote_candidate(task_dir, Path(repair["model_path"]), config, cache, incumbent_cost, metadata=metadata)
+    if result.row is not None:
+        repair["accept_ledger_row"] = result.row
+    if result.reason:
+        repair["promote_reason"] = result.reason
+    return result.promoted
 
 
 def main(argv: list[str] | None = None) -> int:

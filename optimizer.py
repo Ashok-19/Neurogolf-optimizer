@@ -10,14 +10,14 @@ from pathlib import Path
 from .analysis import analyze_model
 from .cache import ValidationCache
 from .graph_utils import load_model, model_hash, save_model
-from .locking import TaskLock
 from .models import Candidate, Mutation, OptimizerConfig, TaskContext, ValidationResult
 from .mutation_base import BaseMutationFamily, filter_family_names, mutation_id
 from .mutations import default_families
 from .mutations.synth_solver import SynthSolver
 from .mutations.where_combo import WhereCombo
 from .near_miss_lab import try_repair_model
-from .reporting import append_jsonl, candidate_summary, write_json, write_task_notes
+from .promotion import promote_candidate
+from .reporting import append_jsonl, candidate_summary, write_json
 from .scoring import delta_points, fresh_rate, is_accepted, is_near_miss, near_miss_category
 from .search.beam import beam_mutation_sets, prune_beam
 from .search.evolutionary import sample_mutation_sets
@@ -389,26 +389,33 @@ class NeuroGolfOptimizer:
         if not candidate.accepted or not candidate.model_path or self.config.dry_run or not self.config.promote:
             return False
         src = Path(candidate.model_path)
-        target = ctx.experiments_dir / "candidate.onnx"
-        with TaskLock(ctx.experiments_dir):
-            fresh_candidate = validate_model(ctx.task_dir, src, self.config, self.cache)
-            if not is_accepted(fresh_candidate.to_json_dict(), old_cost, self.config):
-                return False
-            current_cost = ctx.baseline_cost or old_cost
-            if target.exists():
-                current = validate_model(ctx.task_dir, target, self.config, self.cache)
-                if is_accepted(current.to_json_dict(), ctx.baseline_cost or old_cost, self.config):
-                    current_cost = int(current.cost or current_cost)
-            if fresh_candidate.cost is None or fresh_candidate.cost >= current_cost:
-                return False
-            if target.exists():
-                shutil.copy2(target, ctx.experiments_dir / f"candidate_prev_{timestamp()}.onnx")
-            shutil.copy2(src, target)
-            shutil.copy2(src, ctx.run_dir / "best.onnx")
-            candidate.promoted = True
-            write_task_notes(ctx.experiments_dir / "optimizer_accept_notes.md", candidate, ctx.baseline_cost, current_cost, int(fresh_candidate.cost))
-            write_task_notes(ctx.run_dir / "best_notes.md", candidate, ctx.baseline_cost, current_cost, int(fresh_candidate.cost))
-            return True
+        repair_meta = candidate.mutations[-1].metadata if candidate.mutations else {}
+        metadata = {
+            "repair_family": repair_meta.get("repair_family"),
+            "repair_name": repair_meta.get("repair"),
+            "repair_chain": repair_meta.get("repair_chain"),
+            "source_mutation_family": repair_meta.get("source_mutation_family"),
+            "optimizer_candidate": candidate_summary(candidate, old_cost),
+        }
+        result = promote_candidate(
+            ctx.task_dir,
+            src,
+            self.config,
+            self.cache,
+            old_cost,
+            baseline_cost=ctx.baseline_cost,
+            metadata=metadata,
+            run_best_path=ctx.run_dir / "best.onnx",
+        )
+        if not result.promoted:
+            return False
+        candidate.promoted = True
+        if result.validation is not None:
+            candidate.validation = result.validation
+            candidate.cost = result.validation.cost
+        if result.row is not None:
+            (ctx.run_dir / "best_notes.md").write_text(json.dumps(result.row, indent=2, sort_keys=True) + "\n")
+        return True
 
     def _discover_mutations(self, ctx: TaskContext, parent_model) -> tuple[list[Mutation], dict[str, BaseMutationFamily]]:
         families = self._families(ctx)

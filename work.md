@@ -372,3 +372,121 @@ Remaining blockers:
 
 - task014 is still correctness-solved but not cost-positive; its exact internal repair costs +78 over the near miss and equals incumbent.
 - The projected score moved, but the gain is still tiny relative to the 7900+ target; more near-miss conversions are needed.
+
+## 2026-06-28: Feature 2A repair-aware near-miss replay and accepted ledger
+
+- Added shared validator-backed promotion support in `promotion.py`.
+  - `promote_candidate` now handles official revalidation, current-incumbent comparison, backup, copy, notes, and JSONL ledger.
+  - `record_existing_acceptance` can backfill notes/ledger for an already-promoted accepted candidate after revalidation.
+  - Optimizer promotion and near-miss lab promotion now use the shared helper.
+- Added repair replay campaign runner in `repair_replay_campaign.py`.
+  - Scans retained near misses from `optimizer_runs/*/near_misses.json`, `optimizer_runs/*/near_misses.jsonl`, and useful `near_miss_lab/*/near_miss_lab.json` artifacts.
+  - Prioritizes category A, public-exact, low-ARC, fresh-good, lower-cost candidates.
+  - Runs pair diagnostics, failure classification, `try_repair_model`, official validation, and optional validator-backed promotion.
+  - Writes `repair_replay_report.json`, `repair_replay_report.md`, `accepted.jsonl`, `rejected.jsonl`, `skipped.jsonl`, and `errors.jsonl`.
+  - Respects `max_near_miss_repairs` per replay candidate.
+- Backfilled task396 acceptance notes and ledger after revalidating current and previous candidates.
+
+Validation:
+
+```text
+PYTHONPATH=.chatgpt/operations python3.12 -m compileall -q .chatgpt/operations/neurogolf_optimizer
+passed
+
+PYTHONPATH=.chatgpt/operations python3.12 -m unittest discover -s .chatgpt/operations/neurogolf_optimizer/tests -q
+Ran 79 tests in 24.588s
+OK
+```
+
+task396 sequential validator checks:
+
+```text
+python3.12 validate_task.py --model experiments/candidate.onnx --quick
+public_wrong: 0
+arc_gen_wrong: 0
+fresh: 200/200
+cost: 27446
+exact: true
+
+python3.12 validate_task.py --model experiments/candidate_prev_20260628_003000.onnx --quick
+public_wrong: 0
+arc_gen_wrong: 0
+fresh: 200/200
+cost: 27662
+exact: true
+```
+
+Promotion ledger:
+
+```text
+task396/experiments/optimizer_accept_notes.md
+task396/experiments/optimizer_accept_ledger.jsonl
+
+backfilled row:
+  source_model: task396/experiments/near_miss_lab/20260628_002653/repair_internal_missing_bottom_row_0_gated_extent_0_gated_expected_0.onnx
+  promoted_model: task396/experiments/candidate.onnx
+  previous_candidate_backup: task396/experiments/candidate_prev_20260628_003000.onnx
+  old_cost: 27662
+  new_cost: 27446
+  delta_points: 0.007839192355074687
+```
+
+Repair replay smoke:
+
+```text
+python3.12 .chatgpt/operations/neurogolf_optimizer/repair_replay_campaign.py \
+  --tasks task014,task396 \
+  --fresh-min 0.90 \
+  --dry-run \
+  --max-candidates 20 \
+  --run-id repair_replay_smoke \
+  --timeout 1200
+
+interrupted for runtime after several minutes because retained task014 artifacts produced many official repair validations.
+```
+
+Completed bounded smoke:
+
+```text
+python3.12 .chatgpt/operations/neurogolf_optimizer/repair_replay_campaign.py \
+  --tasks task014,task396 \
+  --fresh-min 0.90 \
+  --dry-run \
+  --max-candidates 2 \
+  --run-id repair_replay_smoke_bounded \
+  --timeout 1200
+
+report: .chatgpt/operations/neurogolf_optimizer/repair_replay_runs/repair_replay_smoke_bounded/repair_replay_report.json
+
+tasks_scanned: 2
+near_misses_found: 46
+near_misses_selected: 2
+supported_failure_classes_count: 2
+repairs_attempted: 16
+accepted_count: 0
+promoted_count: 0
+rejected_count: 16
+error_count: 0
+
+per-task best:
+  task014: repair_internal_missing_last_column_0_dimension rejected by estimated_cost_not_below_incumbent
+  task396: repair_internal_missing_bottom_row_0_gated_extent_0_gated_expected_0 rejected by estimated_cost_not_below_incumbent
+```
+
+Accepted/promoted gains:
+
+```text
+none new in Feature 2A
+existing task396 gain remains 27662 -> 27446
+```
+
+Projected score:
+
+```text
+unchanged at 7157.538383136803
+```
+
+Remaining blockers:
+
+- Replay is deterministic and auditable, but the first smoke did not find a new strictly lower-cost accepted repair.
+- The broader top-100 replay was skipped because the required 20-candidate smoke already exceeded practical runtime before the replay cap fix; future runs should use smaller candidate batches or task-targeted replay.
