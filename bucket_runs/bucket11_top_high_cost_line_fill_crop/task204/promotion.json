@@ -1,0 +1,30 @@
+{
+  "task": 204,
+  "status": "promoted",
+  "rewrite": "Isolated vertical-side event extraction, quantized prefix parity, uint8 nearest-endpoint pooling, and final label rendering.",
+  "baseline": {
+    "memory": 7732,
+    "params": 1514,
+    "cost": 9246,
+    "points": 15.86805369545183,
+    "fresh_right": 1000,
+    "fresh_total": 1000
+  },
+  "candidate": {
+    "memory": 9090,
+    "params": 122,
+    "cost": 9212,
+    "points": 15.871737739059425,
+    "fresh_right": 1000,
+    "fresh_total": 1000,
+    "sha256": "6d244872a802c27949465a418c6aed6844d4704d97b2b3cc419db8c8369c03ce"
+  },
+  "validation": {
+    "public_right": 6,
+    "public_wrong": 0,
+    "arc_gen_right": 262,
+    "arc_gen_wrong": 0,
+    "promotion_gate_passed": true
+  },
+  "point_gain": 0.003684043607595555
+}
