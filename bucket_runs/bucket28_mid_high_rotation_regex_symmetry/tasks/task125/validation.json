@@ -1,0 +1,32 @@
+{
+  "task": "task125",
+  "rewrite": "spatial_hinge_final_qlinearconv",
+  "structural_rewrite": true,
+  "baseline": {
+    "original_cost": 3463,
+    "previous_promoted_cost": 3038
+  },
+  "candidate": {
+    "cost": 2403,
+    "memory": 2197,
+    "params": 206,
+    "nodes": 10,
+    "file_size": 1316,
+    "sha256": "20a0589e7bf69e5e4129d3039ec2ccc73ff42307be16c3d8063de6ac213b356c"
+  },
+  "validation": {
+    "public_wrong": 0,
+    "arc_gen_wrong": 0,
+    "arc_gen_total": 262,
+    "fresh_right": 1000,
+    "fresh_total": 1000,
+    "numpy_fresh_exact": 5000
+  },
+  "gain": {
+    "cost_reduction_vs_previous": 635,
+    "incremental_points": 0.23448144741924892,
+    "cost_reduction_vs_original": 1060,
+    "total_points_vs_original": 0.365417308665954
+  },
+  "rule": "Recover the exact bounded cyan cavity from four directional MaxPools, encode cyan/yellow/pink as two compact hinge features, and use one final-output 3x3 QLinearConv to perform both the one-cell green halo and final four-color rendering."
+}
