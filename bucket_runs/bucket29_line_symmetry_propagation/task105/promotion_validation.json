@@ -1,0 +1,41 @@
+{
+  "task": 105,
+  "status": "promoted",
+  "promotion_gates": {
+    "public_right": 4,
+    "public_wrong": 0,
+    "arc_gen_right": 262,
+    "arc_gen_wrong": 0,
+    "fresh_right": 1000,
+    "fresh_total": 1000,
+    "fresh_accuracy": 1.0,
+    "exact": true
+  },
+  "exact_cost": {
+    "memory": 2016,
+    "params": 196,
+    "cost": 2212,
+    "points": 17.298347637357775
+  },
+  "baseline": {
+    "cost": 2738,
+    "points": 17.085016994151605
+  },
+  "improvement": {
+    "cost_reduction": 526,
+    "point_gain": 0.21333064320617012
+  },
+  "model": {
+    "path": "tasks/task105/model.onnx",
+    "builder": "tasks/task105/work/build_matmul_masks.py",
+    "sha256": "396f5284a222e7292a9960cbd40b91132fbfc889ebdf9422fdf27bc0c2c687ac",
+    "file_size": 4312,
+    "nodes": 59,
+    "onnx_checker": "pass",
+    "conv_bias_check": "pass"
+  },
+  "validation_commands": [
+    "python3 validate.py --task 105 --model tasks/task105/model.onnx --all",
+    "python3 tools/score_one.py tasks/task105/model.onnx 105"
+  ]
+}
