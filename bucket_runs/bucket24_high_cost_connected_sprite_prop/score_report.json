@@ -1,0 +1,58 @@
+{
+  "bucket": "bucket24_high_cost_connected_sprite_prop",
+  "baseline_score": 163.5245469071735,
+  "updated_score": 164.10057640266928,
+  "gain": 0.5760294954957885,
+  "target_gain": 10.0,
+  "target_reached": false,
+  "promoted_tasks": [
+    {
+      "task": "task005",
+      "baseline_cost": 6413,
+      "new_cost": 5638,
+      "baseline_points": 16.233917540851138,
+      "new_points": 16.36271532832594,
+      "gain": 0.1287977874748023,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "fresh_right": 1000,
+      "fresh_total": 1000,
+      "builder": "builders/task005/build_scatter_rays_v2.py"
+    },
+    {
+      "task": "task009",
+      "baseline_cost": 6694,
+      "new_cost": 6021,
+      "baseline_points": 16.191033118228727,
+      "new_points": 16.29699136253555,
+      "gain": 0.10595824430682299,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "fresh_right": 1000,
+      "fresh_total": 1000,
+      "builder": "builders/task009/build_nearest_scans.py"
+    },
+    {
+      "task": "task017",
+      "baseline_cost": 5136,
+      "new_cost": 3651,
+      "baseline_points": 16.4559701546302,
+      "new_points": 16.79724361834436,
+      "gain": 0.3412734637141597,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "fresh_right": 1000,
+      "fresh_total": 1000,
+      "builder": "builders/task017/build_encoded_classifier.py"
+    }
+  ],
+  "remaining_tasks": [
+    "task089",
+    "task157",
+    "task192",
+    "task208",
+    "task278",
+    "task328",
+    "task383"
+  ]
+}
