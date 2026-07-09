@@ -1,0 +1,17 @@
+{
+  "task": "task009",
+  "rewrite": "nearest directional scans",
+  "model_archive": "../../bucket24_promoted_artifacts.zip",
+  "model_path_inside_archive": "tasks/task009/model.onnx",
+  "builder": "../../builders/task009/build_nearest_scans.py",
+  "model_sha256": "54cb3700f1c8f812eaf052ad230ce4c4931e68952af155f348b2819c7d21449e",
+  "model_size_bytes": 4020,
+  "baseline_cost": 6694,
+  "new_cost": 6021,
+  "gain": 0.10595824430682299,
+  "public_wrong": 0,
+  "arc_gen_wrong": 0,
+  "fresh_right": 1000,
+  "fresh_total": 1000,
+  "promoted": true
+}
