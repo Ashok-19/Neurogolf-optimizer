@@ -1,0 +1,37 @@
+{
+  "task": 268,
+  "rewrite": "global_population_and_weighted_color_moment_compact_qconv",
+  "structural_rewrite": true,
+  "incumbent": {
+    "cost": 2653,
+    "points": 17.11655364586226
+  },
+  "candidate": {
+    "cost": 2628,
+    "memory": 2547,
+    "params": 81,
+    "nodes": 95,
+    "file_size": 6253,
+    "points": 17.1260216203955,
+    "sha256": "cb7b17b6aed171e1780949069fb5ac6131937ef139cbba2d54e77256cd3a2f27"
+  },
+  "validation": {
+    "public_wrong": 0,
+    "arc_gen_wrong": 0,
+    "arc_gen_total": 262,
+    "fresh_right": 1000,
+    "fresh_total": 1000,
+    "numpy_fresh_exact": 5000,
+    "onnx_full_check": true
+  },
+  "incremental": {
+    "cost_reduction": 25,
+    "point_gain": 0.009467974533237111
+  },
+  "bucket": {
+    "previous_score": 171.70752218042298,
+    "updated_score": 171.71699015495622,
+    "baseline_score": 170.2744029140315,
+    "updated_total_gain": 1.4425872409247233
+  }
+}
