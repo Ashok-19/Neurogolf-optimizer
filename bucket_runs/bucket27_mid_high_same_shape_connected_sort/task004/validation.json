@@ -1,0 +1,28 @@
+{
+  "task": 4,
+  "rewrite": "compact scalar uint8 label plane",
+  "baseline": {
+    "memory": 3981,
+    "params": 70,
+    "cost": 4051,
+    "points": 16.69328095679731
+  },
+  "candidate": {
+    "model": "task004/model.onnx",
+    "sha256": "273c268b2a6993e293be05058a70703d82ceaa73ee91f680dd94a3adb1b6ade9",
+    "memory": 3924,
+    "params": 62,
+    "cost": 3986,
+    "points": 16.709456499227258,
+    "gain": 0.016175542429948
+  },
+  "validation": {
+    "public_right": 3,
+    "public_wrong": 0,
+    "arc_gen_right": 262,
+    "arc_gen_wrong": 0,
+    "fresh_right": 300,
+    "fresh_total": 300,
+    "exact": true
+  }
+}
