@@ -1,0 +1,16 @@
+{
+  "task": "task328",
+  "rewrite": "signed affine corner Voronoi",
+  "model_sha256": "7f1cf2e96660ea2045ce950b87ad4f6fda23694ec52cf3b7002a84e7e8138e5c",
+  "model_size_bytes": 5661,
+  "baseline_cost": 6304,
+  "new_cost": 5711,
+  "memory": 5570,
+  "params": 141,
+  "gain": 0.09879021287285283,
+  "public_wrong": 0,
+  "arc_gen_wrong": 0,
+  "fresh_right": 1000,
+  "fresh_total": 1000,
+  "promoted": true
+}
