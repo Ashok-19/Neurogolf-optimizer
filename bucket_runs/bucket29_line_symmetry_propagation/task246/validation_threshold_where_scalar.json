@@ -1,0 +1,16 @@
+{
+  "task": 246,
+  "model": "tasks/task246/work/candidate_threshold_where_scalar.onnx",
+  "public_right": 4,
+  "public_wrong": 0,
+  "arc_gen_right": 262,
+  "arc_gen_wrong": 0,
+  "fresh_right": 1000,
+  "fresh_total": 1000,
+  "memory": 1292,
+  "params": 93,
+  "cost": 1385,
+  "points": 17.76654458137856,
+  "profiled": true,
+  "exact": true
+}
