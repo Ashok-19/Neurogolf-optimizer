@@ -1,0 +1,30 @@
+{
+  "task": 209,
+  "status": "promoted",
+  "rewrite": "Compact crop/sprite inference with 3x5 correlation, uint8 biased coordinate rendering, and final palette equality.",
+  "baseline": {
+    "memory": 7508,
+    "params": 267,
+    "cost": 7775,
+    "points": 16.041331262952568,
+    "fresh_right": 973,
+    "fresh_total": 1000
+  },
+  "candidate": {
+    "memory": 7143,
+    "params": 271,
+    "cost": 7414,
+    "points": 16.088874616289324,
+    "fresh_right": 973,
+    "fresh_total": 1000,
+    "sha256": "773473c73ef798bad49566edf3a15133da1e2beae7dc6bfd5fd749284ae32d63"
+  },
+  "validation": {
+    "public_right": 4,
+    "public_wrong": 0,
+    "arc_gen_right": 262,
+    "arc_gen_wrong": 0,
+    "promotion_gate_passed": true
+  },
+  "point_gain": 0.047543353336757375
+}

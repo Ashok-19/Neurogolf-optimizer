@@ -1,8 +1,8 @@
 {
   "bucket": "bucket11_top_high_cost_line_fill_crop",
   "baseline_score": 157.15339233098294,
-  "updated_score": 157.52355296312547,
-  "gain": 0.3701606321425288,
+  "updated_score": 157.57109631646222,
+  "gain": 0.4177039854792781,
   "target_gain": 10.0,
   "target_reached": false,
   "promotion_rule": {
@@ -97,7 +97,7 @@
         "params": 122,
         "cost": 9212,
         "points": 15.871737739059425,
-        "point_gain": 0.003684043607595555,
+        "point_gain": 0.003684043607594942,
         "cost_reduction": 34,
         "nodes": 26,
         "file_size": 3420,
@@ -150,6 +150,41 @@
         "promotion_gate_passed": true
       },
       "builder": "builders/task205_build_candidate.py"
+    },
+    {
+      "task": 209,
+      "structural_rewrite": "Compact crop/sprite inference with 3x5 correlation, uint8 biased coordinate rendering, and final palette equality.",
+      "baseline": {
+        "memory": 7508,
+        "params": 267,
+        "cost": 7775,
+        "points": 16.041331262952568,
+        "fresh_right": 973,
+        "fresh_total": 1000
+      },
+      "candidate": {
+        "memory": 7143,
+        "params": 271,
+        "cost": 7414,
+        "points": 16.088874616289324,
+        "point_gain": 0.047543353336757375,
+        "cost_reduction": 361,
+        "nodes": 166,
+        "file_size": 13128,
+        "sha256": "773473c73ef798bad49566edf3a15133da1e2beae7dc6bfd5fd749284ae32d63"
+      },
+      "validation": {
+        "public_right": 4,
+        "public_wrong": 0,
+        "arc_gen_right": 262,
+        "arc_gen_wrong": 0,
+        "candidate_fresh_right": 973,
+        "candidate_fresh_total": 1000,
+        "baseline_fresh_right": 973,
+        "baseline_fresh_total": 1000,
+        "promotion_gate_passed": true
+      },
+      "builder": "builders/task209_build_candidate.py"
     }
   ],
   "non_promoted_attempts": [
@@ -163,7 +198,7 @@
     },
     {
       "task": 138,
-      "result": "Exact frame-crop directional-ray structural rewrite passed public, ARC-GEN, and 1000/1000 fresh, but was rejected because cost 13950 exceeded baseline cost 11591."
+      "result": "Exact frame-crop directional-ray rewrite passed public, ARC-GEN, and 1000/1000 fresh, but was rejected because cost 13950 exceeded baseline cost 11591."
     }
   ],
   "validation_method": {
