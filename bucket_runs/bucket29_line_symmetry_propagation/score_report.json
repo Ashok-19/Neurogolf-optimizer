@@ -1,65 +1,25 @@
 {
   "bucket": "bucket29_line_symmetry_propagation",
   "baseline_score": 172.29835641071892,
-  "updated_score": 174.25690117628454,
-  "gain": 1.9585447655656196,
+  "updated_score": 174.41316378931492,
+  "gain": 2.114807378596003,
   "promoted_tasks": {
     "105": {
       "baseline": {"cost": 2738, "points": 17.085016994151605, "memory": 2628, "params": 110, "nodes": 94, "file_size": 7698},
-      "candidate": {"cost": 2212, "points": 17.298347637357775, "memory": 2016, "params": 196, "nodes": 59, "file_size": 4312, "builder": "tasks/task105/work/build_matmul_masks.py", "sha256": "396f5284a222e7292a9960cbd40b91132fbfc889ebdf9422fdf27bc0c2c687ac"},
+      "candidate": {"cost": 1892, "points": 17.45461025038818, "memory": 1737, "params": 155, "nodes": 58, "file_size": 4433, "builder": "tasks/task105/work/build_qmatmul_bitpair.py", "sha256": "fcd42a3f477a9f0cc091361459c90949c443e210d261f2ba269af4070d87352b"},
       "validation": {"public_right": 4, "public_wrong": 0, "arc_gen_right": 262, "arc_gen_wrong": 0, "fresh_right": 1000, "fresh_total": 1000},
-      "point_gain": 0.21333064320617012
+      "point_gain": 0.36959325623657063,
+      "previous_promoted": {"cost": 2212, "points": 17.298347637357775, "memory": 2016, "params": 196, "nodes": 59, "file_size": 4312, "builder": "tasks/task105/work/build_matmul_masks.py", "sha256": "396f5284a222e7292a9960cbd40b91132fbfc889ebdf9422fdf27bc0c2c687ac"},
+      "incremental_gain_vs_previous": 0.15626261303040176
     },
-    "71": {
-      "baseline": {"cost": 2655, "points": 17.11580006632396, "memory": 2599, "params": 56, "nodes": 30, "file_size": 3931},
-      "candidate": {"cost": 1782, "points": 17.514508391969244, "memory": 1726, "params": 56, "nodes": 31, "file_size": 2665, "builder": "tasks/task071/work/build_centered_convint.py", "sha256": "57a31da7b9cd34db6bc3c9de87a4d490452ea78e096347122bd3bd78429769cd"},
-      "validation": {"public_right": 3, "public_wrong": 0, "arc_gen_right": 262, "arc_gen_wrong": 0, "fresh_right": 1000, "fresh_total": 1000},
-      "point_gain": 0.39870832564528413
-    },
-    "245": {
-      "baseline": {"cost": 2345, "points": 17.23995931911962, "memory": 2284, "params": 61, "nodes": 27, "file_size": 1726},
-      "candidate": {"cost": 1768, "points": 17.52239575680241, "memory": 1684, "params": 84, "nodes": 27, "file_size": 1915, "builder": "tasks/task245/work/build_signedcode_shift.py", "sha256": "c520bab90ed6b7304e1cc19f2c6dad0f381972837991170a4cc4c4c1dd2d0d25"},
-      "validation": {"public_right": 5, "public_wrong": 0, "arc_gen_right": 262, "arc_gen_wrong": 0, "fresh_right": 1000, "fresh_total": 1000},
-      "point_gain": 0.28243643768279014
-    },
-    "397": {
-      "baseline": {"cost": 2490, "points": 17.179962010541246, "memory": 2174, "params": 316, "nodes": 58, "file_size": 3531},
-      "candidate": {"cost": 2190, "memory": 2072, "params": 118, "points": 17.308343177189453, "nodes": 59, "file_size": 3256, "builder": "tasks/task397/work/build_qanchor_directscatter_qpoly.py", "sha256": "987d663ef32f9c9f12c872812edebe206b0c98a62519b2ef61a3a81e281de080"},
-      "validation": {"public_wrong": 0, "arc_gen_wrong": 0, "arc_gen_total": 262, "fresh_correct": 1000, "fresh_total": 1000, "fresh_accuracy": 1.0},
-      "point_gain": 0.1283811666482073
-    },
-    "154": {
-      "baseline": {"cost": 2677, "points": 17.10754795647965, "memory": 2573, "params": 104, "nodes": 38, "file_size": 3367},
-      "candidate": {"cost": 2138, "points": 17.332373908415008, "memory": 2018, "params": 120, "nodes": 34, "file_size": 3241, "builder": "tasks/task154/work/build_bitpair_qconv.py", "sha256": "f194a4b6335d51706b1d1f159aad7cb88dd4e0df9510bea8714e5fbe4f21c081"},
-      "validation": {"public_right": 4, "public_wrong": 0, "arc_gen_right": 262, "arc_gen_wrong": 0, "fresh_right": 1000, "fresh_total": 1000},
-      "point_gain": 0.22482595193535815
-    },
-    "354": {
-      "baseline": {"cost": 1860, "points": 17.471668233292753, "memory": 1764, "params": 96, "nodes": 20, "file_size": 1836},
-      "candidate": {"cost": 1746, "points": 17.53491726360045, "memory": 1650, "params": 96, "nodes": 18, "file_size": 1632, "builder": "tasks/task354/work/build_propagate_qpoly.py", "sha256": "642b266a9abe18c008fd9cc2933905db20f3166f051a506f4ef3d1f88991b0e8"},
-      "validation": {"public_right": 4, "public_wrong": 0, "arc_gen_right": 262, "arc_gen_wrong": 0, "fresh_right": 1000, "fresh_total": 1000},
-      "point_gain": 0.06324903030769846
-    },
-    "42": {
-      "baseline": {"cost": 2542, "points": 17.159293548250602, "memory": 2192, "params": 350, "nodes": 12, "file_size": 1578},
-      "candidate": {"cost": 1902, "memory": 1500, "params": 402, "points": 17.449338756894665, "nodes": 9, "file_size": 1496, "builder": "tasks/task042/work/build_direct_local_qconv.py", "sha256": "5bc223378ef9646cde5bbeaf2bd05a8a7cca22963e6f9472431ebea6a416d7a1"},
-      "validation": {"public_wrong": 0, "arc_gen_wrong": 0, "arc_gen_total": 262, "fresh_correct": 289, "fresh_total": 289, "fresh_accuracy": 1.0, "exhaustive_rule_correct": 1930, "exhaustive_rule_total": 1930, "validation_artifact": "tasks/task042/work/validate_exhaustive_rule.py"},
-      "point_gain": 0.290045208644063
-    },
-    "330": {
-      "baseline": {"cost": 2825, "points": 17.05373635641946, "memory": 2600, "params": 225, "nodes": 19, "file_size": 1556},
-      "previous_promoted": {"cost": 2737, "points": 17.08538229095932, "memory": 2500, "params": 237, "nodes": 19, "file_size": 1731, "builder": "tasks/task330/work/build_rootcount_convint.py", "sha256": "3f53b6a4bfd40396824cbc571faba33e49c8d5eed6ccb1c3596bb22cb97c736b"},
-      "candidate": {"cost": 1990, "points": 17.404110082281463, "memory": 1800, "params": 190, "nodes": 9, "file_size": 1202, "builder": "tasks/task330/work/build_merged_spur_qconv.py", "sha256": "78469329049d0c896979dc638c0e9f0a1463db4432a7b304c92508da33b6d2a4"},
-      "validation": {"public_right": 4, "public_wrong": 0, "arc_gen_right": 262, "arc_gen_wrong": 0, "fresh_right": 1000, "fresh_total": 1000, "fresh_validator": "tasks/task330/work/validate_direct_fresh.py", "validation_artifact": "tasks/task330/work/validation_merged_spur_qconv.json"},
-      "point_gain": 0.3503737258620033,
-      "incremental_gain_vs_previous": 0.318727791322141
-    },
-    "246": {
-      "baseline": {"cost": 1395, "points": 17.759350305744533, "memory": 1226, "params": 169, "nodes": 24, "file_size": 2454},
-      "candidate": {"cost": 1385, "points": 17.76654458137856, "memory": 1292, "params": 93, "nodes": 22, "file_size": 1771, "builder": "tasks/task246/work/build_threshold_where_scalar.py", "sha256": "a97d4b7b96853cebfa7eebd8ab4b944611565ea128e48094b307b221cffee668"},
-      "validation": {"public_right": 4, "public_wrong": 0, "arc_gen_right": 262, "arc_gen_wrong": 0, "fresh_right": 1000, "fresh_total": 1000},
-      "point_gain": 0.007194275634027747
-    }
+    "71": {"baseline": {"cost": 2655, "points": 17.11580006632396, "memory": 2599, "params": 56, "nodes": 30, "file_size": 3931}, "candidate": {"cost": 1782, "points": 17.514508391969244, "memory": 1726, "params": 56, "nodes": 31, "file_size": 2665, "builder": "tasks/task071/work/build_centered_convint.py", "sha256": "57a31da7b9cd34db6bc3c9de87a4d490452ea78e096347122bd3bd78429769cd"}, "validation": {"public_right": 3, "public_wrong": 0, "arc_gen_right": 262, "arc_gen_wrong": 0, "fresh_right": 1000, "fresh_total": 1000}, "point_gain": 0.39870832564528413},
+    "245": {"baseline": {"cost": 2345, "points": 17.23995931911962, "memory": 2284, "params": 61, "nodes": 27, "file_size": 1726}, "candidate": {"cost": 1768, "points": 17.52239575680241, "memory": 1684, "params": 84, "nodes": 27, "file_size": 1915, "builder": "tasks/task245/work/build_signedcode_shift.py", "sha256": "c520bab90ed6b7304e1cc19f2c6dad0f381972837991170a4cc4c4c1dd2d0d25"}, "validation": {"public_right": 5, "public_wrong": 0, "arc_gen_right": 262, "arc_gen_wrong": 0, "fresh_right": 1000, "fresh_total": 1000}, "point_gain": 0.28243643768279014},
+    "397": {"baseline": {"cost": 2490, "points": 17.179962010541246, "memory": 2174, "params": 316, "nodes": 58, "file_size": 3531}, "candidate": {"cost": 2190, "memory": 2072, "params": 118, "points": 17.308343177189453, "nodes": 59, "file_size": 3256, "builder": "tasks/task397/work/build_qanchor_directscatter_qpoly.py", "sha256": "987d663ef32f9c9f12c872812edebe206b0c98a62519b2ef61a3a81e281de080"}, "validation": {"public_wrong": 0, "arc_gen_wrong": 0, "arc_gen_total": 262, "fresh_correct": 1000, "fresh_total": 1000, "fresh_accuracy": 1.0}, "point_gain": 0.1283811666482073},
+    "154": {"baseline": {"cost": 2677, "points": 17.10754795647965, "memory": 2573, "params": 104, "nodes": 38, "file_size": 3367}, "candidate": {"cost": 2138, "points": 17.332373908415008, "memory": 2018, "params": 120, "nodes": 34, "file_size": 3241, "builder": "tasks/task154/work/build_bitpair_qconv.py", "sha256": "f194a4b6335d51706b1d1f159aad7cb88dd4e0df9510bea8714e5fbe4f21c081"}, "validation": {"public_right": 4, "public_wrong": 0, "arc_gen_right": 262, "arc_gen_wrong": 0, "fresh_right": 1000, "fresh_total": 1000}, "point_gain": 0.22482595193535815},
+    "354": {"baseline": {"cost": 1860, "points": 17.471668233292753, "memory": 1764, "params": 96, "nodes": 20, "file_size": 1836}, "candidate": {"cost": 1746, "points": 17.53491726360045, "memory": 1650, "params": 96, "nodes": 18, "file_size": 1632, "builder": "tasks/task354/work/build_propagate_qpoly.py", "sha256": "642b266a9abe18c008fd9cc2933905db20f3166f051a506f4ef3d1f88991b0e8"}, "validation": {"public_right": 4, "public_wrong": 0, "arc_gen_right": 262, "arc_gen_wrong": 0, "fresh_right": 1000, "fresh_total": 1000}, "point_gain": 0.06324903030769846},
+    "42": {"baseline": {"cost": 2542, "points": 17.159293548250602, "memory": 2192, "params": 350, "nodes": 12, "file_size": 1578}, "candidate": {"cost": 1902, "memory": 1500, "params": 402, "points": 17.449338756894665, "nodes": 9, "file_size": 1496, "builder": "tasks/task042/work/build_direct_local_qconv.py", "sha256": "5bc223378ef9646cde5bbeaf2bd05a8a7cca22963e6f9472431ebea6a416d7a1"}, "validation": {"public_wrong": 0, "arc_gen_wrong": 0, "arc_gen_total": 262, "fresh_correct": 289, "fresh_total": 289, "fresh_accuracy": 1.0, "exhaustive_rule_correct": 1930, "exhaustive_rule_total": 1930, "validation_artifact": "tasks/task042/work/validate_exhaustive_rule.py"}, "point_gain": 0.290045208644063},
+    "330": {"baseline": {"cost": 2825, "points": 17.05373635641946, "memory": 2600, "params": 225, "nodes": 19, "file_size": 1556}, "candidate": {"cost": 1990, "points": 17.404110082281463, "memory": 1800, "params": 190, "nodes": 9, "file_size": 1202, "builder": "tasks/task330/work/build_merged_spur_qconv.py", "sha256": "78469329049d0c896979dc638c0e9f0a1463db4432a7b304c92508da33b6d2a4"}, "validation": {"public_right": 4, "public_wrong": 0, "arc_gen_right": 262, "arc_gen_wrong": 0, "fresh_right": 1000, "fresh_total": 1000, "fresh_validator": "tasks/task330/work/validate_direct_fresh.py", "validation_artifact": "tasks/task330/work/validation_merged_spur_qconv.json"}, "point_gain": 0.3503737258620033, "previous_promoted": {"cost": 2737, "points": 17.08538229095932, "memory": 2500, "params": 237, "nodes": 19, "file_size": 1731, "builder": "tasks/task330/work/build_rootcount_convint.py", "sha256": "3f53b6a4bfd40396824cbc571faba33e49c8d5eed6ccb1c3596bb22cb97c736b"}, "incremental_gain_vs_previous": 0.318727791322141},
+    "246": {"baseline": {"cost": 1395, "points": 17.759350305744533, "memory": 1226, "params": 169, "nodes": 24, "file_size": 2454}, "candidate": {"cost": 1385, "points": 17.76654458137856, "memory": 1292, "params": 93, "nodes": 22, "file_size": 1771, "builder": "tasks/task246/work/build_threshold_where_scalar.py", "sha256": "a97d4b7b96853cebfa7eebd8ab4b944611565ea128e48094b307b221cffee668"}, "validation": {"public_right": 4, "public_wrong": 0, "arc_gen_right": 262, "arc_gen_wrong": 0, "fresh_right": 1000, "fresh_total": 1000}, "point_gain": 0.007194275634027747}
   },
-  "score_gain": 1.9585447655656196
+  "score_gain": 2.114807378596003
 }

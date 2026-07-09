@@ -1,0 +1,33 @@
+{
+  "task": 105,
+  "status": "promoted",
+  "model": "tasks/task105/model.onnx",
+  "builder": "tasks/task105/work/build_qmatmul_bitpair.py",
+  "public_right": 4,
+  "public_wrong": 0,
+  "arc_gen_right": 262,
+  "arc_gen_wrong": 0,
+  "fresh_right": 1000,
+  "fresh_total": 1000,
+  "fresh_wrong": 0,
+  "memory": 1737,
+  "params": 155,
+  "cost": 1892,
+  "points": 17.45461025038818,
+  "previous_promoted_cost": 2212,
+  "cost_reduction_vs_previous": 320,
+  "point_gain_vs_previous": 0.15626261303040176,
+  "baseline_cost": 2738,
+  "point_gain_vs_baseline": 0.36959325623657063,
+  "sha256": "fcd42a3f477a9f0cc091361459c90949c443e210d261f2ba269af4070d87352b",
+  "file_size": 4433,
+  "nodes": 58,
+  "onnx_checker": "pass",
+  "strict_shape_inference": "pass",
+  "banned_ops": "none",
+  "exact": true,
+  "exact_cost_repetitions": [
+    {"memory": 1737, "params": 155, "cost": 1892},
+    {"memory": 1737, "params": 155, "cost": 1892}
+  ]
+}
