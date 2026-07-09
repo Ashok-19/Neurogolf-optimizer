@@ -1,0 +1,22 @@
+{
+  "bucket": "bucket28_mid_high_rotation_regex_symmetry",
+  "baseline_score": 170.2744029140315,
+  "updated_score": 171.44701659455157,
+  "gain": 1.1726136805200724,
+  "target_gain": 10.0,
+  "target_reached": false,
+  "promoted_tasks": [37, 86, 90, 93, 125, 137, 268, 270, 333, 390],
+  "validation": {
+    "public_wrong_each": 0,
+    "arc_gen_wrong_each": 0,
+    "fresh_each": "1000/1000",
+    "onnx_full_check": "10/10"
+  },
+  "new_promotions_after_task390": {
+    "task125": {"baseline_cost": 3463, "new_cost": 3038, "point_gain": 0.1309358612467051},
+    "task137": {"baseline_cost": 3345, "new_cost": 3234, "point_gain": 0.03374693242528082},
+    "task268": {"baseline_cost": 2883, "new_cost": 2653, "point_gain": 0.0831403435006628},
+    "task270": {"baseline_cost": 2561, "new_cost": 2515, "point_gain": 0.018125003665684147}
+  },
+  "models_archive_sha256": "21f9155100a6374a531e0dbe2a72be5a6db1845cde8b37610f7509ec581eb451"
+}
