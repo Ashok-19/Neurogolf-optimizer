@@ -1,0 +1,16 @@
+{
+  "task": "task383",
+  "rewrite": "direct boundary-marker recovery",
+  "model_sha256": "7b99e80313ef4d5c5a3408505979fc3c295c8f1e5f00fa3840fa266c591fcdda",
+  "model_size_bytes": 3787,
+  "baseline_cost": 5830,
+  "new_cost": 5749,
+  "memory": 5678,
+  "params": 71,
+  "gain": 0.013991073721250302,
+  "public_wrong": 0,
+  "arc_gen_wrong": 0,
+  "fresh_right": 1000,
+  "fresh_total": 1000,
+  "promoted": true
+}

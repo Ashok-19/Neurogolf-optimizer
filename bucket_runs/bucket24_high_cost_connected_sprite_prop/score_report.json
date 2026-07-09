@@ -1,8 +1,8 @@
 {
   "bucket": "bucket24_high_cost_connected_sprite_prop",
   "baseline_score": 163.5245469071735,
-  "updated_score": 164.19936661554215,
-  "gain": 0.6748197083686591,
+  "updated_score": 164.21335768926338,
+  "gain": 0.6888107820898881,
   "target_gain": 10.0,
   "target_reached": false,
   "promoted_tasks": [
@@ -57,6 +57,19 @@
       "fresh_right": 1000,
       "fresh_total": 1000,
       "builder": "builders/task328/build_affine_voronoi.py"
+    },
+    {
+      "task": "task383",
+      "baseline_cost": 5830,
+      "new_cost": 5749,
+      "baseline_points": 16.32922772065546,
+      "new_points": 16.34321879437671,
+      "gain": 0.013991073721250302,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "fresh_right": 1000,
+      "fresh_total": 1000,
+      "builder": "builders/task383/build_direct_boundary_markers.py"
     }
   ],
   "remaining_tasks": [
@@ -64,7 +77,6 @@
     "task157",
     "task192",
     "task208",
-    "task278",
-    "task383"
+    "task278"
   ]
 }

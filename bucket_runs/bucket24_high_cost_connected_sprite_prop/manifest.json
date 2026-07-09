@@ -136,19 +136,19 @@
     {
       "task": 383,
       "ok": true,
-      "public_wrong": null,
-      "arc_gen_wrong": null,
-      "cost": 5830,
-      "points": 16.32922772065546,
-      "memory": 5734,
-      "params": 96,
-      "nodes": 54,
-      "file_size": 4120,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "cost": 5749,
+      "points": 16.34321879437671,
+      "memory": 5678,
+      "params": 71,
+      "nodes": 50,
+      "file_size": 3787,
       "score_method": "static_shape_cost",
-      "validated": false
+      "validated": true
     }
   ],
-  "total_score": 164.19936661554215,
-  "total_points": 164.19936661554215,
+  "total_score": 164.21335768926338,
+  "total_points": 164.21335768926338,
   "bucket_zip": "bucket24_high_cost_connected_sprite_prop.zip"
 }
