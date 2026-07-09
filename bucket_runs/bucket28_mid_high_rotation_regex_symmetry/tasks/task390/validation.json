@@ -1,0 +1,28 @@
+{
+  "task": "task390",
+  "rewrite": "compact_feature_qlinearconv",
+  "structural_rewrite": true,
+  "baseline": {
+    "cost": 2699
+  },
+  "candidate": {
+    "cost": 2608,
+    "memory": 2477,
+    "params": 131,
+    "nodes": 79,
+    "file_size": 5198,
+    "sha256": "ce5b486afb988438c71198bd4c3008eb887363eb0482c79fcc8a96ed7d1af6c2"
+  },
+  "validation": {
+    "public_wrong": 0,
+    "arc_gen_wrong": 0,
+    "arc_gen_total": 262,
+    "fresh_right": 1000,
+    "fresh_total": 1000
+  },
+  "gain": {
+    "cost_reduction": 91,
+    "points": 0.03429768997146102
+  },
+  "rule": "Reflect the gray payload across the nearest red gripper line, then render red and gray from two compact feature planes with a final-output QLinearConv."
+}
