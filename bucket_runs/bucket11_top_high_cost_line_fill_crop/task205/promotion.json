@@ -1,0 +1,9 @@
+{
+  "task": 205,
+  "status": "promoted",
+  "rewrite": "Compact 1-D rectangle support projections, marker-color inference, and a rank-2 separable final renderer.",
+  "baseline": {"cost": 4891, "points": 16.504847939460642, "fresh_right": 986, "fresh_total": 1000},
+  "candidate": {"cost": 3905, "points": 16.729986937726213, "fresh_right": 988, "fresh_total": 1000, "sha256": "bfefb36d1a0aaa3b9d272fb333628dbdeb86cfa0b4974f37c2b47879984557cb"},
+  "validation": {"public_wrong": 0, "arc_gen_wrong": 0, "promotion_gate_passed": true},
+  "point_gain": 0.22513899826557093
+}

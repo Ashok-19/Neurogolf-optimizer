@@ -1,0 +1,139 @@
+{
+  "bucket": "bucket11_top_high_cost_line_fill_crop",
+  "baseline_score": 157.15339233098294,
+  "updated_score": 157.51986891951788,
+  "gain": 0.3664765885349368,
+  "target_gain": 10.0,
+  "target_reached": false,
+  "promotion_rule": {
+    "public_wrong_required": 0,
+    "arc_gen_wrong_required": 0,
+    "fresh_requirement": "Candidate must match or beat baseline fresh validation; if baseline is weak, candidate must also exceed 90%."
+  },
+  "promoted_tasks": [
+    {
+      "task": 158,
+      "structural_rewrite": "Minimum-normalized-variance fill-color selection, compact 4-anchor template learning, and scale-1/2/3 A/B corner-pair stamping.",
+      "baseline": {
+        "memory": 20994,
+        "params": 1192,
+        "cost": 22186,
+        "points": 14.992783261701396,
+        "fresh_right": 1000,
+        "fresh_total": 1000
+      },
+      "candidate": {
+        "memory": 18991,
+        "params": 1293,
+        "cost": 20284,
+        "points": 15.08241232308509,
+        "point_gain": 0.08962906138369497,
+        "cost_reduction": 1902,
+        "nodes": 94,
+        "file_size": 11859,
+        "sha256": "1f62578ed96d569b0643a3898886a3134aa4345f979a8144d5b15957b90b580d"
+      },
+      "validation": {
+        "public_right": 4,
+        "public_wrong": 0,
+        "arc_gen_right": 262,
+        "arc_gen_wrong": 0,
+        "candidate_fresh_right": 1000,
+        "candidate_fresh_total": 1000,
+        "baseline_fresh_right": 1000,
+        "baseline_fresh_total": 1000,
+        "promotion_gate_passed": true
+      },
+      "builder": "builders/task158_build_candidate.py"
+    },
+    {
+      "task": 198,
+      "structural_rewrite": "Compact pitch-specific wall-hole sampling on small cell grids, followed by adjacent-cell propagation and direct full-canvas rendering.",
+      "baseline": {
+        "memory": 11305,
+        "params": 105,
+        "cost": 11410,
+        "points": 15.657754557143878,
+        "fresh_right": 1000,
+        "fresh_total": 1000
+      },
+      "candidate": {
+        "memory": 10624,
+        "params": 211,
+        "cost": 10835,
+        "points": 15.70946308602954,
+        "point_gain": 0.05170852888566202,
+        "cost_reduction": 575,
+        "nodes": 90,
+        "file_size": 5893,
+        "sha256": "ba4acaf61defc23a22d1f49264dad06fa70fdea16749a822ee418d1d6fbd1563"
+      },
+      "validation": {
+        "public_right": 4,
+        "public_wrong": 0,
+        "arc_gen_right": 262,
+        "arc_gen_wrong": 0,
+        "candidate_fresh_right": 1000,
+        "candidate_fresh_total": 1000,
+        "baseline_fresh_right": 1000,
+        "baseline_fresh_total": 1000,
+        "promotion_gate_passed": true
+      },
+      "builder": "builders/task198_build_candidate.py"
+    },
+    {
+      "task": 205,
+      "structural_rewrite": "Compact 1-D rectangle support projections, marker-color inference, and a rank-2 separable final renderer.",
+      "baseline": {
+        "memory": 4846,
+        "params": 45,
+        "cost": 4891,
+        "points": 16.504847939460642,
+        "fresh_right": 986,
+        "fresh_total": 1000
+      },
+      "candidate": {
+        "memory": 3866,
+        "params": 39,
+        "cost": 3905,
+        "points": 16.729986937726213,
+        "point_gain": 0.22513899826557093,
+        "cost_reduction": 986,
+        "nodes": 66,
+        "file_size": 6632,
+        "sha256": "bfefb36d1a0aaa3b9d272fb333628dbdeb86cfa0b4974f37c2b47879984557cb"
+      },
+      "validation": {
+        "public_right": 4,
+        "public_wrong": 0,
+        "arc_gen_right": 262,
+        "arc_gen_wrong": 0,
+        "candidate_fresh_right": 988,
+        "candidate_fresh_total": 1000,
+        "baseline_fresh_right": 986,
+        "baseline_fresh_total": 1000,
+        "promotion_gate_passed": true
+      },
+      "builder": "builders/task205_build_candidate.py"
+    }
+  ],
+  "non_promoted_attempts": [
+    {
+      "task": 145,
+      "result": "Exact structural vector-extent candidate was rejected because cost 13105 exceeded baseline cost 12855."
+    },
+    {
+      "task": 204,
+      "result": "Rectangle-enclosure prototypes were not exact on fresh validation because nearby boxes created accidental square bounds."
+    },
+    {
+      "task": 219,
+      "result": "Additional low-cost heuristic rewrite did not clear the required >90% fresh threshold and was not promoted."
+    }
+  ],
+  "validation_method": {
+    "public_and_arc_gen": "Official validate.py/scorer verification.",
+    "fresh": "Same task generator, exclusion set, seed start 10000, tensor conversion, and grids_match logic as validate.py; evaluated in parallel with ORT graph optimizations disabled.",
+    "exact_cost": "Official scorer profiling through validate.py --fresh-n 0."
+  }
+}
