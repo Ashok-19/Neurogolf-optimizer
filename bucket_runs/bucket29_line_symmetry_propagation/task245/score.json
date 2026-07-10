@@ -1,0 +1,16 @@
+{
+  "task": 245,
+  "model": "tasks/task245/work/candidate.onnx",
+  "public_right": 5,
+  "public_wrong": 0,
+  "arc_gen_right": 262,
+  "arc_gen_wrong": 0,
+  "fresh_right": 1000,
+  "fresh_total": 1000,
+  "memory": 1284,
+  "params": 73,
+  "cost": 1357,
+  "points": 17.78696834016513,
+  "profiled": true,
+  "exact": true
+}
