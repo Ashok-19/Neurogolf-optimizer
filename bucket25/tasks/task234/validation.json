@@ -1,0 +1,14 @@
+{
+  "task": 234,
+  "rewrite": "exponential bbox coordinates and final rank-1 rendering",
+  "public_wrong": 0,
+  "arc_gen_wrong": 0,
+  "fresh_right": 1000,
+  "fresh_total": 1000,
+  "baseline_cost": 2984,
+  "candidate_cost": 2578,
+  "baseline_points": 16.99898003867635,
+  "candidate_points": 17.145230816500867,
+  "point_gain": 0.14625077782451612,
+  "sha256": "bf4abbf2dba70792ac343ed2e0feda162b2ffc89076982140b41a02433434631"
+}
