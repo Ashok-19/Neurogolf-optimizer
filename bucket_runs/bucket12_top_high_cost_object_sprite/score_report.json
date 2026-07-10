@@ -2,10 +2,11 @@
   "bucket": "bucket12_top_high_cost_object_sprite",
   "target_gain": 10.0,
   "baseline_total_points": 152.9139338497183,
-  "current_total_points": 153.09509322907596,
-  "total_gain": 0.18115937935766624,
+  "current_total_points": 153.17407888080328,
+  "total_gain": 0.2601450310849902,
   "promoted_tasks": [
     285,
+    349,
     366,
     367
   ],
@@ -119,19 +120,23 @@
     {
       "task": 349,
       "baseline_cost": 14892,
-      "current_cost": 14892,
+      "current_cost": 13761,
       "baseline_points": 15.391420565007392,
-      "current_points": 15.391420565007392,
-      "gain": 0.0,
-      "promoted": false,
-      "public_wrong": null,
-      "arc_gen_wrong": null,
-      "fresh_right": null,
-      "fresh_total": null,
-      "memory": 13710,
-      "params": 1182,
+      "current_points": 15.470406216734718,
+      "gain": 0.07898565172732575,
+      "promoted": true,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "fresh_right": 1000,
+      "fresh_total": 1000,
+      "memory": 12810,
+      "params": 951,
       "nodes": 13,
-      "builder": null
+      "builder": "tasks/task349/work/build_grouped_radius_qconv.py",
+      "baseline_fresh_right": 1000,
+      "baseline_fresh_total": 1000,
+      "file_size": 2102,
+      "sha256": "0d613839548c195e6b94fc310010992d65c6cea24a0a3ff72f8aa5e0987f6bba"
     },
     {
       "task": 364,
@@ -185,5 +190,19 @@
       "builder": "tasks/task367/work/build_candidate.py"
     }
   ],
-  "status": "in_progress"
+  "status": "in_progress",
+  "failed_attempts": [
+    {
+      "task": 233,
+      "attempt": "exact code-index sparse matcher",
+      "result": "rejected",
+      "reason": "0 public wrong and 0 ARC-GEN wrong, but exact cost 60764 exceeded baseline 34400; three isolation rounds dominated memory."
+    },
+    {
+      "task": 286,
+      "attempt": "single parity-lattice connectivity propagation",
+      "result": "rejected",
+      "reason": "generator paths can touch and merge across parity lattices, so the representation is not exact."
+    }
+  ]
 }
