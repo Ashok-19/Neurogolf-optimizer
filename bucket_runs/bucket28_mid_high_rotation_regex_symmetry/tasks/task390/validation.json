@@ -1,28 +1,40 @@
 {
-  "task": "task390",
-  "rewrite": "compact_feature_qlinearconv",
+  "task": 390,
+  "rewrite": "direct_compact_red_and_reflected_gray_planes_qconv",
   "structural_rewrite": true,
-  "baseline": {
-    "cost": 2699
-  },
-  "candidate": {
+  "incumbent": {
     "cost": 2608,
     "memory": 2477,
     "params": 131,
     "nodes": 79,
-    "file_size": 5198,
-    "sha256": "ce5b486afb988438c71198bd4c3008eb887363eb0482c79fcc8a96ed7d1af6c2"
+    "points": 17.133661076953455
+  },
+  "candidate": {
+    "cost": 2358,
+    "memory": 2186,
+    "params": 172,
+    "nodes": 55,
+    "file_size": 3551,
+    "points": 17.23443091890268,
+    "sha256": "7df97970cbb43df3b5cb9cec206fff3c294201452843677d766dbff259128b8a"
   },
   "validation": {
     "public_wrong": 0,
     "arc_gen_wrong": 0,
     "arc_gen_total": 262,
     "fresh_right": 1000,
-    "fresh_total": 1000
+    "fresh_total": 1000,
+    "numpy_fresh_exact": 5000,
+    "onnx_full_check": true
   },
-  "gain": {
-    "cost_reduction": 91,
-    "points": 0.03429768997146102
+  "incremental": {
+    "cost_reduction": 250,
+    "point_gain": 0.10076984194922645
   },
-  "rule": "Reflect the gray payload across the nearest red gripper line, then render red and gray from two compact feature planes with a final-output QLinearConv."
+  "bucket": {
+    "previous_score": 171.71699015495622,
+    "updated_score": 171.81775999690544,
+    "baseline_score": 170.2744029140315,
+    "updated_total_gain": 1.5433570828739391
+  }
 }
