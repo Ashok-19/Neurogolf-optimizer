@@ -1,25 +1,19 @@
 {
   "bucket": "bucket28_mid_high_rotation_regex_symmetry",
   "baseline_score": 170.2744029140315,
-  "updated_score": 171.81775999690544,
-  "gain": 1.5433570828739391,
+  "updated_score": 171.81995332380697,
+  "gain": 1.5455504097754726,
   "target_gain": 10.0,
   "target_reached": false,
-  "promoted_tasks": [37, 86, 90, 93, 125, 137, 268, 270, 333, 390],
-  "latest_promotions": {
-    "task268": {
-      "cost": 2628,
+  "latest_promotion": {
+    "task137": {
+      "previous_cost": 3195,
+      "new_cost": 3188,
+      "incremental_point_gain": 0.0021933269015299572,
       "public_wrong": 0,
       "arc_gen_wrong": 0,
-      "fresh": "1000/1000"
-    },
-    "task390": {
-      "previous_cost": 2608,
-      "new_cost": 2358,
-      "point_gain": 0.10076984194922645,
-      "public_wrong": 0,
-      "arc_gen_wrong": 0,
-      "fresh": "1000/1000"
+      "fresh": "1000/1000",
+      "numpy_fresh": "5000/5000"
     }
   },
   "validation": {
@@ -28,5 +22,5 @@
     "fresh_each": "1000/1000",
     "onnx_full_check": "10/10"
   },
-  "models_archive_sha256": "e91f47d77ea4f5344f16c639032c020d1688fb1607db20f2085f98fcc7e771c9"
+  "models_archive_sha256": "3c17db2c17c397f4ab7ac59060ae96169ce1413a70a9f26659a7538c41f60dc9"
 }

@@ -1,0 +1,38 @@
+{
+  "task": 137,
+  "rewrite": "scaled_moment_einsum_total",
+  "structural_rewrite": true,
+  "incumbent": {
+    "cost": 3195,
+    "points": 16.930657633188364
+  },
+  "candidate": {
+    "cost": 3188,
+    "memory": 3124,
+    "params": 64,
+    "nodes": 30,
+    "file_size": 2204,
+    "points": 16.932850960089894,
+    "sha256": "7a1109efbf4cd1bfb17c3c66a9d8e9af2b69899e70c75da677092ac36ddfb748"
+  },
+  "validation": {
+    "public_wrong": 0,
+    "arc_gen_wrong": 0,
+    "arc_gen_total": 262,
+    "fresh_right": 1000,
+    "fresh_total": 1000,
+    "numpy_fresh_exact": 5000,
+    "onnx_full_check": true
+  },
+  "incremental": {
+    "cost_reduction": 7,
+    "point_gain": 0.0021933269015299572
+  },
+  "bucket": {
+    "baseline_score": 170.2744029140315,
+    "previous_score": 171.81775999690544,
+    "updated_score": 171.81995332380697,
+    "updated_total_gain": 1.5455504097754726
+  },
+  "rule": "Use shifted one-third coordinate moments so first moments cast directly to center coordinates, infer grid population with a parameter-free Einsum reduction, recover spacing from 1.5015*(3Q-C^2), and render exact Chebyshev-modulo rings with the final output-free Where."
+}
