@@ -1,0 +1,136 @@
+{
+  "source_zip": "delta600_run_7a58db06/baseline/submission-current.zip",
+  "runtime": {
+    "python": "python3.12",
+    "onnxruntime": "1.24.4",
+    "onnx": "1.21.0",
+    "numpy": "2.4.4"
+  },
+  "tasks": [
+    {
+      "task": 23,
+      "ok": true,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "cost": 4929,
+      "points": 16.497108593294623,
+      "memory": 3942,
+      "params": 987,
+      "score_method": "profiled",
+      "fresh_right": 189,
+      "fresh_total": 200,
+      "baseline_cost": 6572,
+      "baseline_points": 16.20942652084284,
+      "builder": "tasks/task023/work/build_mlp_round1.py"
+    },
+    {
+      "task": 44,
+      "ok": true,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "cost": 3212,
+      "points": 16.925350924933348,
+      "memory": 3060,
+      "params": 152,
+      "score_method": "profiled"
+    },
+    {
+      "task": 64,
+      "ok": true,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "cost": 7386,
+      "points": 16.09265840458749,
+      "memory": 7248,
+      "params": 138,
+      "score_method": "profiled"
+    },
+    {
+      "task": 74,
+      "ok": true,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "cost": 8398,
+      "points": 15.964251138755861,
+      "memory": 7336,
+      "params": 1062,
+      "score_method": "profiled"
+    },
+    {
+      "task": 255,
+      "ok": true,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "cost": 6769,
+      "points": 16.179891355491392,
+      "memory": 6353,
+      "params": 416,
+      "score_method": "profiled"
+    },
+    {
+      "task": 324,
+      "ok": true,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "cost": 8533,
+      "points": 15.948303721463414,
+      "memory": 7308,
+      "params": 1225,
+      "score_method": "profiled"
+    },
+    {
+      "task": 338,
+      "ok": true,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "cost": 5535,
+      "points": 16.381153154857262,
+      "memory": 5305,
+      "params": 230,
+      "score_method": "profiled"
+    },
+    {
+      "task": 350,
+      "ok": true,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "cost": 9036,
+      "points": 15.891028122412106,
+      "memory": 9012,
+      "params": 24,
+      "score_method": "profiled"
+    },
+    {
+      "task": 370,
+      "ok": true,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "cost": 6742,
+      "points": 16.183888104205995,
+      "memory": 6207,
+      "params": 535,
+      "score_method": "profiled"
+    },
+    {
+      "task": 379,
+      "ok": true,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "cost": 7511,
+      "points": 16.075876108313988,
+      "memory": 7356,
+      "params": 155,
+      "score_method": "profiled",
+      "fresh_right": 200,
+      "fresh_total": 200,
+      "baseline_cost": 7793,
+      "baseline_points": 16.03901882615644,
+      "builder": "tasks/task379/work/build_argmax_qmm.py"
+    }
+  ],
+  "total_score": 162.13950962831547,
+  "total_points": 162.13950962831547,
+  "bucket_zip": "bucket23_high_cost_same_shape_regex_fill.zip",
+  "baseline_total_score": 161.81497027370614,
+  "total_gain": 0.32453935460932826
+}
