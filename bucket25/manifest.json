@@ -1,0 +1,142 @@
+{
+  "source_zip": "delta600_run_7a58db06/baseline/submission-current.zip",
+  "runtime": {
+    "python": "python3.12",
+    "onnxruntime": "1.24.4",
+    "onnx": "1.21.0",
+    "numpy": "2.4.4"
+  },
+  "tasks": [
+    {
+      "task": 8,
+      "ok": true,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "cost": 2363,
+      "points": 17.23231272281309,
+      "memory": 2200,
+      "params": 163,
+      "score_method": "official scorer exact cost",
+      "nodes": 93,
+      "file_size": 6236,
+      "validated": true
+    },
+    {
+      "task": 80,
+      "ok": true,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "cost": 4987,
+      "points": 16.485410194453877,
+      "memory": 4719,
+      "params": 268,
+      "score_method": "profiled"
+    },
+    {
+      "task": 92,
+      "ok": true,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "cost": 1180,
+      "points": 17.92673028254029,
+      "memory": 0,
+      "params": 1180,
+      "score_method": "profiled"
+    },
+    {
+      "task": 148,
+      "ok": true,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "cost": 4508,
+      "points": 16.586391124840333,
+      "memory": 4282,
+      "params": 226,
+      "score_method": "official scorer exact cost",
+      "nodes": 63,
+      "file_size": 4645,
+      "validated": true
+    },
+    {
+      "task": 182,
+      "ok": true,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "cost": 5204,
+      "points": 16.442817160367603,
+      "memory": 5162,
+      "params": 42,
+      "score_method": "profiled"
+    },
+    {
+      "task": 222,
+      "ok": true,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "cost": 1872,
+      "points": 17.465237342962464,
+      "memory": 920,
+      "params": 952,
+      "score_method": "profiled"
+    },
+    {
+      "task": 234,
+      "ok": true,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "cost": 2578,
+      "points": 17.145230816500867,
+      "memory": 2453,
+      "params": 125,
+      "score_method": "official scorer exact cost",
+      "nodes": 125,
+      "file_size": 6105,
+      "validated": true
+    },
+    {
+      "task": 279,
+      "ok": true,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "cost": 5546,
+      "points": 16.37916777382428,
+      "memory": 5508,
+      "params": 38,
+      "score_method": "profiled"
+    },
+    {
+      "task": 280,
+      "ok": true,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "cost": 4009,
+      "points": 16.703702887357494,
+      "memory": 3191,
+      "params": 818,
+      "score_method": "official scorer exact cost",
+      "nodes": 111,
+      "file_size": 9773,
+      "validated": true
+    },
+    {
+      "task": 382,
+      "ok": true,
+      "public_wrong": 0,
+      "arc_gen_wrong": 0,
+      "cost": 5009,
+      "points": 16.481008426642383,
+      "memory": 4855,
+      "params": 154,
+      "score_method": "official scorer exact cost",
+      "nodes": 67,
+      "file_size": 3730,
+      "validated": true
+    }
+  ],
+  "total_score": 168.84800873230267,
+  "total_points": 168.84800873230267,
+  "bucket_zip": "bucket25_high_cost_symmetry_palette_prop.zip",
+  "baseline_total_score": 168.41449976936394,
+  "total_gain": 0.4335089629387312,
+  "promotion_status": "partial; continuing toward +10"
+}
