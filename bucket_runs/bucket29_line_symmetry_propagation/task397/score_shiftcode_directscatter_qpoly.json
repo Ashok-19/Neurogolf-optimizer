@@ -1,0 +1,16 @@
+{
+  "task": 397,
+  "model": "tasks/task397/work/candidate_shiftcode_directscatter_qpoly.onnx",
+  "public_right": 4,
+  "public_wrong": 0,
+  "arc_gen_right": 262,
+  "arc_gen_wrong": 0,
+  "fresh_right": 1000,
+  "fresh_total": 1000,
+  "memory": 2017,
+  "params": 107,
+  "cost": 2124,
+  "points": 17.338943617638172,
+  "profiled": true,
+  "exact": true
+}

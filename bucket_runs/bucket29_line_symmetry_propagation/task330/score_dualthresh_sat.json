@@ -1,0 +1,17 @@
+{
+  "task": 330,
+  "model": "tasks/task330/work/candidate_dualthresh_sat.onnx",
+  "public_right": 4,
+  "public_wrong": 0,
+  "arc_gen_right": 262,
+  "arc_gen_wrong": 0,
+  "fresh_right": 50,
+  "fresh_total": 50,
+  "validation_artifact": "tasks/task330/work/proof_dualthresh_sat.md",
+  "memory": 1400,
+  "params": 352,
+  "cost": 1752,
+  "points": 17.531486728503662,
+  "profiled": true,
+  "exact": true
+}
