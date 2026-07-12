@@ -1,0 +1,16 @@
+{
+  "task": 81,
+  "model": "tasks/task081/work/candidate_twofeature.onnx",
+  "public_right": 1,
+  "public_wrong": 2,
+  "arc_gen_right": 132,
+  "arc_gen_wrong": 129,
+  "fresh_right": 239,
+  "fresh_total": 500,
+  "memory": null,
+  "params": null,
+  "cost": null,
+  "points": null,
+  "profiled": false,
+  "exact": false
+}
