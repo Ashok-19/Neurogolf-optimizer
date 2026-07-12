@@ -1,0 +1,29 @@
+{
+  "task346": {
+    "baseline_cost": 778,
+    "final_cost": 697,
+    "gain": 0.10994111341786772,
+    "public_wrong": 0,
+    "arc_gen_wrong": 0,
+    "fresh": "1000/1000",
+    "model_encoding": "gzip+base64"
+  },
+  "task365": {
+    "baseline_cost": 2928,
+    "final_cost": 2852,
+    "gain": 0.026299093547015703,
+    "public_wrong": 0,
+    "arc_gen_wrong": 0,
+    "fresh": "1000/1000",
+    "model_encoding": "gzip+base64"
+  },
+  "task377": {
+    "baseline_cost": 2739,
+    "final_cost": 2548,
+    "gain": 0.07228415257102422,
+    "public_wrong": 0,
+    "arc_gen_wrong": 0,
+    "fresh": "1000/1000",
+    "model_encoding": "gzip+base64"
+  }
+}
