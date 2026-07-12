@@ -1,0 +1,19 @@
+{
+  "bucket": 34,
+  "baseline_total_score": 183.0379625777926,
+  "current_total_score": 185.0347274703821,
+  "total_verified_gain": 1.9967648925895176,
+  "status": "paused below +10 target",
+  "tasks": [
+    {"task": 48, "baseline_cost": 803, "current_cost": 803, "gain": 0.0, "public_wrong": 0, "arc_gen_wrong": 0},
+    {"task": 81, "baseline_cost": 463, "current_cost": 463, "gain": 0.0, "public_wrong": 0, "arc_gen_wrong": 0},
+    {"task": 143, "baseline_cost": 694, "current_cost": 495, "gain": 0.3379141979381153, "public_wrong": 0, "arc_gen_wrong": 0, "fresh": "1000/1000"},
+    {"task": 160, "baseline_cost": 1124, "current_cost": 1124, "gain": 0.0, "public_wrong": 0, "arc_gen_wrong": 0},
+    {"task": 206, "baseline_cost": 1458, "current_cost": 1458, "gain": 0.0, "public_wrong": 0, "arc_gen_wrong": 0},
+    {"task": 214, "baseline_cost": 525, "current_cost": 343, "gain": 0.4256678154256832, "public_wrong": 0, "arc_gen_wrong": 0, "fresh": "200/200"},
+    {"task": 215, "baseline_cost": 358, "current_cost": 190, "gain": 0.6335089142402168, "public_wrong": 0, "arc_gen_wrong": 0, "fresh": "1000/1000"},
+    {"task": 224, "baseline_cost": 1657, "current_cost": 1175, "gain": 0.3437405908483022, "public_wrong": 0, "arc_gen_wrong": 0, "fresh": "500/500"},
+    {"task": 225, "baseline_cost": 1023, "current_cost": 792, "gain": 0.2559333741372001, "public_wrong": 0, "arc_gen_wrong": 0, "fresh": "200/200"},
+    {"task": 226, "baseline_cost": 895, "current_cost": 895, "gain": 0.0, "public_wrong": 0, "arc_gen_wrong": 0}
+  ]
+}
