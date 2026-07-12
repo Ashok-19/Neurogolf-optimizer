@@ -1,0 +1,9 @@
+{
+  "bucket": 34,
+  "checkpoint_gain": 1.0253417804111677,
+  "tasks": {
+    "214": {"cost": 343, "gain": 0.4256678154256832, "public_wrong": 0, "arc_gen_wrong": 0, "fresh": "200/200"},
+    "224": {"cost": 1175, "gain": 0.3437405908483022, "public_wrong": 0, "arc_gen_wrong": 0, "fresh": "500/500"},
+    "225": {"cost": 792, "gain": 0.2559333741372001, "public_wrong": 0, "arc_gen_wrong": 0, "fresh": "200/200"}
+  }
+}
