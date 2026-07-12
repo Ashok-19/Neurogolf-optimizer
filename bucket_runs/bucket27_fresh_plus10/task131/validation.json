@@ -1,0 +1,26 @@
+{
+  "task": 131,
+  "rewrite": "dynamic true-size single-canvas translation and direct label rendering",
+  "baseline": {
+    "memory": 3250,
+    "params": 644,
+    "cost": 3894,
+    "points": 16.732807814067854
+  },
+  "candidate": {
+    "memory": 2592,
+    "params": 87,
+    "cost": 2679,
+    "points": 17.10680113045539,
+    "gain": 0.3739933163875371
+  },
+  "validation": {
+    "public_right": 4,
+    "public_wrong": 0,
+    "arc_gen_right": 262,
+    "arc_gen_wrong": 0,
+    "fresh_right": 1000,
+    "fresh_total": 1000,
+    "exact": true
+  }
+}
