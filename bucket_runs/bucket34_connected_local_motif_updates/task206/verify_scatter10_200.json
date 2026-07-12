@@ -1,0 +1,16 @@
+{
+  "task": 206,
+  "model": "tasks/task206/work/candidate_scatter10.onnx",
+  "public_right": 0,
+  "public_wrong": 4,
+  "arc_gen_right": 0,
+  "arc_gen_wrong": 262,
+  "fresh_right": 0,
+  "fresh_total": 200,
+  "memory": null,
+  "params": null,
+  "cost": null,
+  "points": null,
+  "profiled": false,
+  "exact": false
+}
