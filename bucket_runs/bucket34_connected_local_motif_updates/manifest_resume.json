@@ -1,0 +1,25 @@
+{
+  "source_zip": "submission-current.zip",
+  "runtime": {
+    "python": "3.13.5",
+    "onnxruntime": "1.24.4",
+    "onnx": "1.21.0",
+    "numpy": "2.4.4"
+  },
+  "tasks": [
+    {"task": 48, "ok": true, "public_wrong": 0, "arc_gen_wrong": 0, "cost": 803, "points": 18.31164528605324, "memory": 688, "params": 115, "score_method": "profiled"},
+    {"task": 81, "ok": true, "public_wrong": 0, "arc_gen_wrong": 0, "cost": 463, "points": 18.862272945913766, "memory": 392, "params": 71, "score_method": "profiled"},
+    {"task": 143, "ok": true, "public_wrong": 0, "arc_gen_wrong": 0, "cost": 495, "points": 18.79544223743131, "memory": 318, "params": 177, "score_method": "profiled"},
+    {"task": 160, "ok": true, "public_wrong": 0, "arc_gen_wrong": 0, "cost": 1124, "points": 17.975350969546362, "memory": 800, "params": 324, "score_method": "profiled"},
+    {"task": 206, "ok": true, "public_wrong": 0, "arc_gen_wrong": 0, "cost": 1458, "points": 17.715179087431395, "memory": 1300, "params": 158, "score_method": "profiled"},
+    {"task": 214, "ok": true, "public_wrong": 0, "arc_gen_wrong": 0, "cost": 343, "points": 19.16226955283406, "memory": 204, "params": 139, "score_method": "profiled"},
+    {"task": 215, "ok": true, "public_wrong": 0, "arc_gen_wrong": 0, "cost": 190, "points": 19.752975927839515, "memory": 0, "params": 190, "score_method": "profiled"},
+    {"task": 224, "ok": true, "public_wrong": 0, "arc_gen_wrong": 0, "cost": 1175, "points": 17.93097657342174, "memory": 1024, "params": 151, "score_method": "profiled"},
+    {"task": 225, "ok": true, "public_wrong": 0, "arc_gen_wrong": 0, "cost": 792, "points": 18.325438608185575, "memory": 666, "params": 126, "score_method": "profiled"},
+    {"task": 226, "ok": true, "public_wrong": 0, "arc_gen_wrong": 0, "cost": 895, "points": 18.203176281725145, "memory": 533, "params": 362, "score_method": "profiled"}
+  ],
+  "total_score": 185.0347274703821,
+  "total_points": 185.0347274703821,
+  "bucket_zip": "bucket34_connected_local_motif_updates.zip",
+  "local_total_score": 185.0347274703821
+}
