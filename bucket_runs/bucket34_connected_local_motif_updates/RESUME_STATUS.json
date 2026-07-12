@@ -1,0 +1,42 @@
+{
+  "bucket": 34,
+  "snapshot_date": "2026-07-12",
+  "status": "paused; resumable checkpoint",
+  "branch": "bucket34-checkpoints",
+  "baseline_total_score": 183.0379625777926,
+  "current_total_score": 185.0347274703821,
+  "verified_gain": 1.9967648925895105,
+  "target_gain": 10.0,
+  "remaining_to_target": 8.00323510741049,
+  "current_models": {
+    "48": {"path": "tasks/task048/model.onnx", "bytes": 6389, "sha256": "0c4ad4580ff998cf053588d1c1e263af1896e524e2356ab61e2721404059483c", "cost": 803, "points": 18.31164528605324},
+    "81": {"path": "tasks/task081/model.onnx", "bytes": 805, "sha256": "67edc6e154f2c0ba7a37d7034e09d497aeed07d91a6f1dc6b847bc7813ab75f1", "cost": 463, "points": 18.862272945913766},
+    "143": {"path": "tasks/task143/model.onnx", "bytes": 1818, "sha256": "df355ff6316b1afdc80a9ad056bed3ef8490299c75f7d42bb17120b38325b788", "cost": 495, "points": 18.79544223743131},
+    "160": {"path": "tasks/task160/model.onnx", "bytes": 1138, "sha256": "fde41434b62254b232463a20ed8972944b3bfaeda2b973a20e186d578dc2bb77", "cost": 1124, "points": 17.975350969546362},
+    "206": {"path": "tasks/task206/model.onnx", "bytes": 3970, "sha256": "d4c22634121071215100d84a55ecd6845aa865045d2e6042177a8a90338a8d9f", "cost": 1458, "points": 17.715179087431395},
+    "214": {"path": "tasks/task214/model.onnx", "bytes": 1286, "sha256": "0ddb26f5478ea949ca2e2ffbc9164888401b21248e2286177b69812af0409eb6", "cost": 343, "points": 19.16226955283406},
+    "215": {"path": "tasks/task215/model.onnx", "bytes": 1024, "sha256": "126beb05365eaf1edaefb6797406607515259cfc4a0eff2b52e6ac96987ae85c", "cost": 190, "points": 19.752975927839515},
+    "224": {"path": "tasks/task224/model.onnx", "bytes": 977448, "sha256": "b6290ce1b0049d45ba6cd0fff32c7f864008730c38376276bb19ac17ba59e199", "cost": 1175, "points": 17.93097657342174},
+    "225": {"path": "tasks/task225/model.onnx", "bytes": 2519, "sha256": "d1faaabca604f626a1f7282871525f9fdc310fa1a1ff61f6423b78195ccfffd3", "cost": 792, "points": 18.325438608185575},
+    "226": {"path": "tasks/task226/model.onnx", "bytes": 2401, "sha256": "e7dbc4be02efd83966132401440595af0dfb2f42025eab388cf629f4f05b6435", "cost": 895, "points": 18.203176281725145}
+  },
+  "validated_promotions": {
+    "143": {"baseline_cost": 694, "final_cost": 495, "gain": 0.33791419793811417, "validation": "public 0 wrong; ARC-GEN 0 wrong; fresh 1000/1000"},
+    "214": {"baseline_cost": 525, "final_cost": 343, "gain": 0.42566781542568377, "validation": "public 0 wrong; ARC-GEN 0 wrong; fresh 200/200"},
+    "215": {"baseline_cost": 358, "final_cost": 190, "gain": 0.6335089142402142, "validation": "public 0 wrong; ARC-GEN 0 wrong; fresh 1000/1000"},
+    "224": {"baseline_cost": 1657, "final_cost": 1175, "gain": 0.3437405908483036, "validation": "public 0 wrong; ARC-GEN 0 wrong; fresh 500/500"},
+    "225": {"baseline_cost": 1023, "final_cost": 792, "gain": 0.2559333741372007, "validation": "public 0 wrong; ARC-GEN 0 wrong; fresh 200/200"}
+  },
+  "promotion_policy_for_resume": "Only promote new models with about +1 point or close to +1; prefer larger structural gains. Existing smaller exact promotions are retained as checkpoints.",
+  "unfinished_high_value_experiment": {
+    "task": 215,
+    "candidate": "tasks/task215/work/candidate_periodic_scaled.onnx",
+    "builder": "tasks/task215/work/build_periodic_scaled.py",
+    "status": "unvalidated; do not promote until full public, ARC-GEN, fresh, and exact-cost gates pass"
+  },
+  "notes": [
+    "Task224 active model is the exact scalar n-gram rewrite and is reproducible from the included builder.",
+    "Rejected and incomplete work files are intentionally preserved for resumption.",
+    "Profiler traces were not included."
+  ]
+}
