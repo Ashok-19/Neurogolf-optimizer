@@ -1,0 +1,17 @@
+{
+  "bucket": "bucket18_projection_row_col_extraction",
+  "checkpoint_date": "2026-07-12",
+  "verified_total_gain": 0.794279,
+  "promotion_policy": "Future promotions should be approximately +1 point or better per task; retain smaller improvements only as research artifacts.",
+  "promoted": {
+    "189": {"baseline_cost": 610, "final_cost": 579, "gain": 0.052156, "github_commit": "5f3aa1b2"},
+    "195": {"baseline_cost": 570, "final_cost": 409, "gain": 0.331921, "fresh": "1000/1000", "github_commit": "94d2554b"},
+    "207": {"baseline_cost": 203, "final_cost": 168, "gain": 0.189242, "fresh": "1000/1000", "github_commit": "9819a1f9"},
+    "213": {"baseline_cost": 686, "final_cost": 550, "gain": 0.220959, "fresh": "1000/1000", "github_commit": "46611f78"}
+  },
+  "rejected_exact": {
+    "201": {"baseline_cost": 2729, "candidate_cost": 2884, "fresh": "1000/1000", "reason": "higher exact cost"},
+    "185": {"baseline_cost": 1530, "candidate_cost": 1558, "reason": "higher exact cost"}
+  },
+  "next_high_value_targets": [201, 185, 184, 183]
+}
