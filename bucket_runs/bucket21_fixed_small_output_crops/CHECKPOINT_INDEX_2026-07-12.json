@@ -1,0 +1,56 @@
+{
+  "bucket": "bucket21_fixed_small_output_crops.zip",
+  "date": "2026-07-12",
+  "tasks": [316, 325, 334, 346, 347, 351, 355, 365, 377, 384],
+  "promotion_policy": {
+    "normal_min_gain": 1.0,
+    "near_threshold_min_gain": 0.8,
+    "small_candidates_are_checkpoints_only": true
+  },
+  "exact_checkpoint_total_gain": 0.3083186754,
+  "checkpoints": {
+    "346": {
+      "baseline_cost": 778,
+      "candidate_cost": 697,
+      "gain": 0.1099411134,
+      "validation": {"public_wrong": 0, "arcgen_wrong": 0, "fresh_right": 1000, "fresh_total": 1000},
+      "model": "task346/model.onnx.gz.b64",
+      "builder": "task346/build_candidate_rowmask_regex_crop10.py",
+      "status": "exact_checkpoint_not_promotion"
+    },
+    "365": {
+      "baseline_cost": 2928,
+      "candidate_cost": 2852,
+      "gain": 0.0262990935,
+      "validation": {"public_wrong": 0, "arcgen_wrong": 0, "fresh_right": 1000, "fresh_total": 1000},
+      "model": "task365/model.onnx.gz.b64",
+      "builder": "task365/build_candidate_packed_dims.py",
+      "status": "exact_checkpoint_not_promotion"
+    },
+    "377": {
+      "baseline_cost": 2739,
+      "candidate_cost": 2306,
+      "gain": 0.1720784684,
+      "validation": {"public_wrong": 0, "arcgen_wrong": 0, "fresh_right": 1000, "fresh_total": 1000},
+      "model": "task377/model.onnx.gz.b64",
+      "builder": "task377/build_candidate_terminal_einsum_topk10.py",
+      "status": "exact_checkpoint_not_promotion"
+    }
+  },
+  "task325_research": {
+    "prototype": "task325/prototype_scalar_euler.py",
+    "rejected_builder": "task325/build_candidate_slim_unpool.py",
+    "next_direction": "exact packed-row Euler/component solver using free-attribute TfIdfVectorizer or another table operator",
+    "plus_one_target_cost_below": 412
+  },
+  "approximate_rejected": {
+    "355": {
+      "baseline_cost": 431,
+      "candidate_cost": 395,
+      "apparent_gain": 0.0872223252,
+      "reason": "rare extended-random failures; do not promote"
+    }
+  },
+  "resume_report": "RESUME_STATUS_2026-07-12.md",
+  "local_full_snapshot_sha256": "d38088ed08ac7f43304fc31506ec9f16171c7638531981e2f41a09cd784e509d"
+}
