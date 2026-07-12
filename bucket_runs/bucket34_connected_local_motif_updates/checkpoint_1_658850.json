@@ -1,0 +1,13 @@
+{
+  "verified_gain": 1.6588506946513917,
+  "promoted": [214, 215, 224, 225],
+  "latest": {
+    "task": 215,
+    "baseline_cost": 358,
+    "final_cost": 190,
+    "gain": 0.633508914240217,
+    "public_wrong": 0,
+    "arc_gen_wrong": 0,
+    "fresh": "1000/1000"
+  }
+}
