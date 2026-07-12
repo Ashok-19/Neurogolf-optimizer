@@ -1,0 +1,16 @@
+{
+  "task": 224,
+  "model": "tasks/task224/work/candidate_scalar_ngram7.onnx",
+  "public_right": 4,
+  "public_wrong": 0,
+  "arc_gen_right": 262,
+  "arc_gen_wrong": 0,
+  "fresh_right": 500,
+  "fresh_total": 500,
+  "memory": null,
+  "params": null,
+  "cost": null,
+  "points": null,
+  "profiled": false,
+  "exact": true
+}
