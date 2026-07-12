@@ -1,0 +1,19 @@
+{
+  "task": 143,
+  "architecture": "translation-invariant exponential moment ratio plus terminal signed renderer",
+  "public_right": 4,
+  "public_wrong": 0,
+  "arc_gen_right": 262,
+  "arc_gen_wrong": 0,
+  "fresh_right": 1000,
+  "fresh_total": 1000,
+  "profiled_fresh_right": 200,
+  "profiled_fresh_total": 200,
+  "memory": 318,
+  "params": 177,
+  "cost": 495,
+  "baseline_cost": 694,
+  "points": 18.79544223743131,
+  "gain": 0.3379141979381164,
+  "exact": true
+}
