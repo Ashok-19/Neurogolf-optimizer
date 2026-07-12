@@ -1,0 +1,17 @@
+{
+  "task": 215,
+  "architecture": "rank-3 modulo-row periodic propagation in one terminal Einsum",
+  "public_right": 3,
+  "public_wrong": 0,
+  "arc_gen_right": 262,
+  "arc_gen_wrong": 0,
+  "fresh_right": 1000,
+  "fresh_total": 1000,
+  "memory": 0,
+  "params": 190,
+  "cost": 190,
+  "baseline_cost": 358,
+  "points": 19.752975927839515,
+  "gain": 0.633508914240217,
+  "exact": true
+}
