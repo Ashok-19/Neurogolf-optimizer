@@ -1,0 +1,7 @@
+{
+  "task": 117,
+  "rewrite": "one canonical 7x7 source quadrant, body-cell clearing, and one reflect pad",
+  "baseline": {"memory": 3483, "params": 89, "cost": 3572, "points": 16.819119058003608},
+  "candidate": {"memory": 3315, "params": 86, "cost": 3401, "points": 16.868175214992803, "gain": 0.04905615698919421},
+  "validation": {"public_right": 4, "public_wrong": 0, "arc_gen_right": 261, "arc_gen_wrong": 0, "fresh_right": 1000, "fresh_total": 1000, "exact": true}
+}
