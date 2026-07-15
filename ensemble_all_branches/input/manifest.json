@@ -1,0 +1,12 @@
+{
+  "source_bytes": 1495010,
+  "source_sha256": "574f6fe664315ba250eb372772c203ce14e9e48457a832f5f0efa839f124b644",
+  "base64_chars": 1993348,
+  "parts": [
+    {"name": "submission.part001.b64", "chars": 400000},
+    {"name": "submission.part002.b64", "chars": 400000},
+    {"name": "submission.part003.b64", "chars": 400000},
+    {"name": "submission.part004.b64", "chars": 400000},
+    {"name": "submission.part005.b64", "chars": 393348}
+  ]
+}
