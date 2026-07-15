@@ -2,11 +2,12 @@ name: Catalog all NeuroGolf branch candidates
 on:
   push:
     branches: [ensemble-all-branches-20260716]
+  pull_request:
+    branches: [main]
 permissions:
   contents: write
 jobs:
   catalog:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,7 +23,13 @@ jobs:
           python -m pip install onnx==1.21.0 onnxruntime==1.24.4 numpy==2.4.4
       - name: Fetch and catalog every branch
         run: python ensemble_all_branches/inventory_repo_only.py
-      - name: Commit catalog
+      - name: Upload catalog artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-branch-candidate-catalog
+          path: ensemble_all_branches/inventory
+      - name: Commit catalog on direct push only
+        if: github.event_name == 'push' && github.actor != 'github-actions[bot]'
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
