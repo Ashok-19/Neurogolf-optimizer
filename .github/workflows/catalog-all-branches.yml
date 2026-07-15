@@ -25,6 +25,8 @@ jobs:
         run: python ensemble_all_branches/inventory_repo_only.py
       - name: Export every candidate binary and adjacent validation evidence
         run: python ensemble_all_branches/export_all_candidates.py
+      - name: Search complete Git history for prior submission archives
+        run: python ensemble_all_branches/find_history_archives.py
       - name: Upload catalog artifact
         uses: actions/upload-artifact@v4
         with:
@@ -35,6 +37,11 @@ jobs:
         with:
           name: all-branch-candidate-bundle
           path: ensemble_all_branches/candidate_bundle
+      - name: Upload history archive inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: history-archive-inventory
+          path: ensemble_all_branches/history_archives
       - name: Commit catalog on direct push only
         if: github.event_name == 'push' && github.actor != 'github-actions[bot]'
         run: |
