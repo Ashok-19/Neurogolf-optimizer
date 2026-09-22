@@ -1,0 +1,38 @@
+{
+  "task": "task137",
+  "rewrite": "shared_axis_presence_chebyshev",
+  "structural_rewrite": true,
+  "incumbent": {
+    "cost": 3234,
+    "memory": 3137,
+    "params": 97,
+    "points": 16.91852495986295
+  },
+  "candidate": {
+    "cost": 3195,
+    "memory": 3126,
+    "params": 69,
+    "nodes": 32,
+    "file_size": 2351,
+    "points": 16.930657633188364,
+    "sha256": "65bb4e8a7f633801d8383d22d2d2d6e349c378a8efd582473924a4350c7aae4e"
+  },
+  "validation": {
+    "public_wrong": 0,
+    "arc_gen_wrong": 0,
+    "arc_gen_total": 262,
+    "fresh_right": 1000,
+    "fresh_total": 1000,
+    "numpy_fresh_exact": 5000
+  },
+  "incremental": {
+    "cost_reduction": 39,
+    "point_gain": 0.012132673325414345
+  },
+  "bucket": {
+    "previous_score": 171.68149804197083,
+    "updated_score": 171.69363071529625,
+    "baseline_score": 170.2744029140315,
+    "updated_total_gain": 1.4192278012647535
+  }
+}

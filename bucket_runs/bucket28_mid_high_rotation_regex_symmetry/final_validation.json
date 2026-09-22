@@ -1,0 +1,32 @@
+{
+  "bucket": "bucket28_mid_high_rotation_regex_symmetry",
+  "baseline_score": 170.2744029140315,
+  "updated_score": 171.93748050683308,
+  "gain": 1.663077592801585,
+  "target_gain": 10.0,
+  "target_reached": false,
+  "latest_promotion": {
+    "task": 90,
+    "ok": true,
+    "public_wrong": 0,
+    "arc_gen_wrong": 0,
+    "cost": 2606,
+    "points": 17.13442824231521,
+    "memory": 2414,
+    "params": 192,
+    "nodes": 65,
+    "file_size": 4590,
+    "score_method": "official_profile_fixed_shape",
+    "validated": true,
+    "fresh_right": 1000,
+    "fresh_total": 1000,
+    "builder": "tasks/task090/work/build_direct_branch_features.py",
+    "sha256": "3909b6357b4b502d669eec5bef687dbc9ecf0e38ef03134ecd40f89f33a54ba6"
+  },
+  "validation": {
+    "public_wrong_each": 0,
+    "arc_gen_wrong_each": 0,
+    "fresh_each": "1000/1000",
+    "onnx_full_check": "10/10"
+  }
+}

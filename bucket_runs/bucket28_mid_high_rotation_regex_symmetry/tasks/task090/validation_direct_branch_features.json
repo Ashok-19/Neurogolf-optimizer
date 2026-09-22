@@ -1,0 +1,35 @@
+{
+  "task": 90,
+  "rewrite": "direct_branch_feature_low_rank_final_einsum",
+  "structural_rewrite": true,
+  "incumbent": {
+    "cost": 2931,
+    "memory": 2653,
+    "params": 278,
+    "points": 17.016901059289108
+  },
+  "candidate": {
+    "cost": 2606,
+    "memory": 2414,
+    "params": 192,
+    "nodes": 65,
+    "file_size": 4590,
+    "points": 17.13442824231521,
+    "sha256": "3909b6357b4b502d669eec5bef687dbc9ecf0e38ef03134ecd40f89f33a54ba6"
+  },
+  "validation": {
+    "public_right": 5,
+    "public_wrong": 0,
+    "arc_gen_right": 262,
+    "arc_gen_wrong": 0,
+    "fresh_right": 1000,
+    "fresh_total": 1000,
+    "numpy_fresh_exact": 5000,
+    "onnx_full_check": true
+  },
+  "incremental": {
+    "cost_reduction": 325,
+    "point_gain": 0.11752718302610177
+  },
+  "rule": "Keep the exact causal zero-run and ten-interval search, but emit each [constant-one, membership] row/column feature tensor directly with one broadcast Where. This removes both float membership casts, both feature Concats, and a redundant 30-element column coordinate initializer while retaining the output-free four-term Einsum renderer."
+}
